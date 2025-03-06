@@ -7,7 +7,7 @@ public class Cliente {
     private String email;
     private String password;
 
-    //construtor
+    //constructor
     public Cliente(String nome, String morada, LocalDate dataNascimento, String email, String password) {
         this.nome = nome;
         this.morada = morada;
@@ -16,7 +16,7 @@ public class Cliente {
         this.password = password;
     }
 
-    //
+    //Getters e Setters
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
 
