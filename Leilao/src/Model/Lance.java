@@ -1,6 +1,8 @@
 package Model;
 
 import java.time.LocalDateTime;
+import Model.Cliente;
+import Model.Leilao;
 
 public class Lance {
     private Cliente cliente;
