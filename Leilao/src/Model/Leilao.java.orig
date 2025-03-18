@@ -1,10 +1,28 @@
 package Model;
 
+<<<<<<< HEAD
+import java.time.LocalDateTime;
+=======
 import java.time.LocalDate;
+>>>>>>> main
 import java.util.ArrayList;
 import java.util.List;
 
 public class Leilao {
+<<<<<<< HEAD
+    private String nomeProduto;
+    private LocalDateTime dataInicio;
+    private LocalDateTime dataFim;
+    private double valorMinimo;
+    private List<Lance> lances;
+
+    public Leilao(String nomeProduto, LocalDateTime dataInicio, LocalDateTime dataFim, double valorMinimo) {
+        this.nomeProduto = nomeProduto;
+        this.dataInicio = dataInicio;
+        this.dataFim = dataFim;
+        this.valorMinimo = valorMinimo;
+        this.lances = new ArrayList<>();
+=======
     private static int proximoId = 1;
 
     private int id;
@@ -40,11 +58,20 @@ public class Leilao {
 
     public void setId(int id) {
         this.id = id;
+>>>>>>> main
     }
 
     public String getNomeProduto() {
         return nomeProduto;
     }
+<<<<<<< HEAD
+    public LocalDateTime getDataInicio() {
+        return dataInicio;
+    }
+    public LocalDateTime getDataFim() {
+        return dataFim;
+    }
+=======
 
     public void setNomeProduto(String nomeProduto) {
         this.nomeProduto = nomeProduto;
@@ -98,10 +125,15 @@ public class Leilao {
         this.valorMaximo = valorMaximo;
     }
 
+>>>>>>> main
     public List<Lance> getLances() {
         return lances;
     }
 
+<<<<<<< HEAD
+    public void adicionarLance(Lance lance) {
+        lances.add(lance);
+=======
     public void setLances(List<Lance> lances) {
         this.lances = lances;
     }
@@ -112,5 +144,6 @@ public class Leilao {
 
     public void setClientesInscritos(List<Cliente> clientesInscritos) {
         this.clientesInscritos = clientesInscritos;
+>>>>>>> main
     }
 }
