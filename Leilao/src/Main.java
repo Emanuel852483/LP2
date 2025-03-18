@@ -1,12 +1,29 @@
 import Controller.ClienteController;
-import View.MenuClienteView;
+import Controller.LeilaoController;
+import Data.ClienteData;
+import Data.LeilaoData;
+import Model.Cliente;
+import Model.Leilao;
+import View.MenuPrincipalView;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import java.util.List;
+
 public class Main {
     public static void main(String[] args) {
-        ClienteController controller = new ClienteController();
-        MenuClienteView view = new MenuClienteView(controller);
-        view.menu();
+
+        ClienteController clienteController = new ClienteController();
+        LeilaoController leilaoController = new LeilaoController();
+
+        ClienteData clienteData = new ClienteData();
+        List<Cliente> clientes = clienteData.carregarClientes();
+        clienteController.setClientes(clientes);
+
+        LeilaoData leilaoData = new LeilaoData();
+        List<Leilao> leiloes = leilaoData.carregarLeiloes();
+        leilaoController.setLeiloes(leiloes);
+
+        MenuPrincipalView menuPrincipal = new MenuPrincipalView(clienteController, leilaoController);
+        menuPrincipal.exibirMenu();
+
     }
 }
