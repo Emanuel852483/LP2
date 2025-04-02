@@ -1,1 +1,1 @@
-id;nomeProduto;descricao;tipoLeilao;dataInicio;dataFim;valorMinimo;valorMaximo;multiploLance
+id;nomeProduto;descricao;tipoLeilao;dataInicio;dataFim;valorMinimo;valorMaximo;multiploLance;lancesIds;clientesIds

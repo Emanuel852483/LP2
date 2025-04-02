@@ -45,6 +45,14 @@ public class ClienteController {
         return null;
     }
 
+    public boolean existeEmail(String email) {
+        for (Cliente cliente : listarClientes()) {
+            if (cliente.getEmail().equalsIgnoreCase(email.trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     // Método para verificar a senha de um cliente
     public boolean verificarPassword(Cliente cliente, String password) {

@@ -3,7 +3,7 @@ package Model;
 import java.time.LocalDate;
 
 public class Cliente {
-    private static int proximoId = 1; // Contador estático para gerar IDs automaticamente
+    private static int proximoId = 1;
 
     private int id;
     private String nome;

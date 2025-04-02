@@ -5,6 +5,7 @@ import Controller.LeilaoController;
 import Data.ClienteData;
 import Model.Cliente;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Scanner;
@@ -63,7 +64,7 @@ public class MenuPrincipalView {
         if (cliente != null) {
             System.out.println("Login bem-sucedido! Bem-vindo, " + cliente.getNome() + ".");
 
-            // Usa a instância de LeilaoController passada para o MenuPrincipalView
+
             if (cliente.isAdmin()) {
                 MenuAdminView menuAdmin = new MenuAdminView(leilaoController, clienteController);
                 menuAdmin.exibirMenu();
@@ -92,16 +93,47 @@ public class MenuPrincipalView {
             String dataNascimentoStr = scanner.nextLine();
             try {
                 dataNascimento = LocalDate.parse(dataNascimentoStr, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                dataValida = true; // Sai do loop se a data for válida
-            } catch (DateTimeParseException e) {
+
+                LocalDate hoje = LocalDate.now();
+                Period periodo = Period.between(dataNascimento, hoje);
+                if(periodo.getYears() < 18){
+                    System.out.println("O usuário tem que ter mais de 18 anos!");
+
+                }
+                else{
+                    dataValida = true;
+                }
+
+
+            }
+            catch (DateTimeParseException e) {
                 System.out.println("Data inválida. Tente novamente:");
             }
         }
 
-        System.out.print("E-mail: ");
-        String email = scanner.nextLine();
+        String email = "";
+        boolean emailValido = false;
+
+        while (!emailValido) {
+            System.out.print("E-mail: ");
+            email = scanner.nextLine().trim();
+
+
+            if (!email.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")) {
+                System.out.println("Formato de e-mail inválido. Use o formato exemplo@dominio.com");
+                continue;
+            }
+
+
+            if (clienteController.existeEmail(email)) {
+                System.out.println("Este e-mail já se encontra cadastrado. Por favor, use outro.");
+            } else {
+                emailValido = true;
+            }
+        }
+
         System.out.print("Password: ");
-        String password = scanner.nextLine();
+        String password = scanner.nextLine().trim();
 
         // Define um valor padrão para lancesDisponiveis (por exemplo, 0)
         int lancesDisponiveis = 0;
@@ -118,4 +150,3 @@ public class MenuPrincipalView {
 
 
 }
-

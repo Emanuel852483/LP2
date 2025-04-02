@@ -26,14 +26,19 @@ public class LeilaoController {
     }
 
     // Método para remover um leilão
-    public void removerLeilao(Leilao leilao) {
-        leiloes.remove(leilao);
+    public boolean removerLeilao(int id) {
+        Leilao leilao = buscarLeilaoPorId(id);
+        if(leilao != null){
+            leiloes.remove(leilao);
+            return true;
+        }
+        return false;
     }
 
-    // Método para buscar um leilão pelo nome do produto
-    public Leilao buscarLeilaoPorNome(String nomeProduto) {
+    // Método para buscar um leilão pelo id
+    public Leilao buscarLeilaoPorId(int id) {
         for (Leilao leilao : leiloes) {
-            if (leilao.getNomeProduto().equalsIgnoreCase(nomeProduto)) {
+            if (leilao.getId() == id) {
                 return leilao;
             }
         }
@@ -65,10 +70,6 @@ public class LeilaoController {
             return false;
         }
 
-        if (cliente.getLancesDisponiveis() <= 0) {
-            return false;
-        }
-
         // Verifica o tipo de leilão e aplica as regras específicas
         if (leilao instanceof LeilaoEletronico) {
             return registrarLanceEletronico((LeilaoEletronico) leilao, cliente, valor);
@@ -83,6 +84,10 @@ public class LeilaoController {
 
     // Método para registrar lance em leilão eletrônico
     private boolean registrarLanceEletronico(LeilaoEletronico leilao, Cliente cliente, double valor) {
+
+        if (cliente.getLancesDisponiveis() <= 0) {
+            return false;
+        }
 
         double ultimoLance = leilao.getLances().isEmpty() ? leilao.getValorMinimo() : leilao.getLances().getLast().getValor();
 
@@ -111,10 +116,9 @@ public class LeilaoController {
         if (valor >= leilao.getValorMinimo()) {
             Lance lance = new Lance(cliente, leilao, valor, LocalDateTime.now());
             leilao.getLances().add(lance); // Adiciona o lance ao leilão
-            cliente.setLancesDisponiveis(cliente.getLancesDisponiveis() - 1); // Decrementa os lances do cliente
-            return true; // Lance registrado com sucesso
+            return true;
         } else {
-            return false; // Lance inválido
+            return false;
         }
     }
 
@@ -123,11 +127,10 @@ public class LeilaoController {
         // Verifica se o lance é maior ou igual ao valor mínimo
         if (valor >= leilao.getValorMinimo()) {
             Lance lance = new Lance(cliente, leilao, valor, LocalDateTime.now());
-            leilao.getLances().add(lance); // Adiciona o lance ao leilão
-            cliente.setLancesDisponiveis(cliente.getLancesDisponiveis() - 1); // Decrementa os lances do cliente
-            return true; // Lance registrado com sucesso
+            leilao.getLances().add(lance);
+            return true;
         } else {
-            return false; // Lance inválido
+            return false;
         }
     }
 
@@ -135,8 +138,8 @@ public class LeilaoController {
     // Método para listar leilões em que um cliente está inscrito
     public List<Leilao> listarLeiloesPorCliente(Cliente cliente) {
         return leiloes.stream()
-                .filter(leilao -> leilao.getLances().stream()
-                        .anyMatch(lance -> lance.getCliente().equals(cliente)))
+                .filter(leilao -> leilao.getClientesInscritos().stream()
+                        .anyMatch(c -> c.getId() == cliente.getId()))
                 .collect(Collectors.toList());
     }
 
@@ -159,16 +162,16 @@ public class LeilaoController {
 
     public boolean inscreverClienteEmLeilao(Leilao leilao, Cliente cliente) {
         if (leilao != null && cliente != null) {
-            // Verifica se o cliente já está inscrito no leilão
-            if (!leilao.getClientesInscritos().contains(cliente)) {
+            // Verifica se o cliente já está inscrito
+            boolean jaInscrito = leilao.getClientesInscritos().stream()
+                    .anyMatch(c -> c.getId() == cliente.getId());
+
+            if (!jaInscrito) {
                 leilao.getClientesInscritos().add(cliente);
                 return true;
-            } else {
-                return false;
             }
-        } else {
-            return false; // Leilão ou cliente inválido
         }
+        return false;
     }
 
 

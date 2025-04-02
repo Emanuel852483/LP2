@@ -1,10 +1,11 @@
 package Model;
 
 import java.time.LocalDateTime;
-import Model.Cliente;
-import Model.Leilao;
 
 public class Lance {
+    private static int proximoId = 1;
+
+    private int id;
     private Cliente cliente;
     private Leilao leilao;
     private double valor;
@@ -12,6 +13,7 @@ public class Lance {
 
     // Construtor
     public Lance(Cliente cliente, Leilao leilao, double valor, LocalDateTime dataHora) {
+        this.id = proximoId++;
         this.cliente = cliente;
         this.leilao = leilao;
         this.valor = valor;
@@ -19,6 +21,15 @@ public class Lance {
     }
 
     // Getters e Setters
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public Cliente getCliente() {
         return cliente;
     }
@@ -55,8 +66,8 @@ public class Lance {
     @Override
     public String toString() {
         return "Lance{" +
-                "cliente=" + cliente.getNome() +
-                ", leilao=" + leilao.getNomeProduto() +
+                "cliente=" + cliente.getId() +
+                ", leilao=" + leilao.getId() +
                 ", valor=" + valor +
                 ", dataHora=" + dataHora +
                 '}';

@@ -30,9 +30,10 @@ public class MenuAdminView {
             System.out.println("1. Criar Leilão Eletrônico");
             System.out.println("2. Criar Leilão Carta Fechada");
             System.out.println("3. Criar Leilão Venda Direta");
-            System.out.println("4. Listar Leilões");
-            System.out.println("5. Transformar Cliente em Admin");
-            System.out.println("6. Voltar");
+            System.out.println("4. Remover Leilão");
+            System.out.println("5. Listar Leilões");
+            System.out.println("6. Transformar Cliente em Admin");
+            System.out.println("7. Voltar");
             System.out.print("Escolha uma opção: ");
 
             int opcao = scanner.nextInt();
@@ -49,12 +50,15 @@ public class MenuAdminView {
                     criarLeilaoVendaDireta();
                     break;
                 case 4:
-                    listarLeiloes();
+                    removerLeilao();
                     break;
                 case 5:
-                    transformarClienteEmAdminPorId();
+                    listarLeiloes();
                     break;
                 case 6:
+                    transformarClienteEmAdminPorId();
+                    break;
+                case 7:
                     System.out.println("Voltando...");
                     return;
                 default:
@@ -73,7 +77,15 @@ public class MenuAdminView {
         String descricao = scanner.nextLine();
 
 
-        LocalDate dataInicio = solicitarData("Data de início (dd-MM-yyyy): ");
+        LocalDate dataInicio;
+        LocalDate hoje;
+        do{
+            dataInicio = solicitarData("Data de início (dd-MM-yyyy): ");
+            hoje = LocalDate.now();
+            if(dataInicio.isBefore(hoje)){
+                System.out.println("A data de início do leilão tem que ser hoje ou depois de hoje!");
+            }
+        } while (dataInicio.isBefore(hoje));
 
 
         LocalDate dataFim;
@@ -111,8 +123,16 @@ public class MenuAdminView {
         System.out.print("Descrição: ");
         String descricao = scanner.nextLine();
 
+        LocalDate dataInicio;
+        LocalDate hoje;
+        do{
+            dataInicio = solicitarData("Data de início (dd-MM-yyyy): ");
+            hoje = LocalDate.now();
+            if(dataInicio.isBefore(hoje)){
+                System.out.println("A data de início do leilão tem que ser hoje ou depois de hoje!");
+            }
+        } while (dataInicio.isBefore(hoje));
 
-        LocalDate dataInicio = solicitarData("Data de início (dd-MM-yyyy): ");
 
 
         LocalDate dataFim;
@@ -147,8 +167,15 @@ public class MenuAdminView {
         String descricao = scanner.nextLine();
 
 
-        LocalDate dataInicio = solicitarData("Data de início (dd-MM-yyyy): ");
-
+        LocalDate dataInicio;
+        LocalDate hoje;
+        do{
+            dataInicio = solicitarData("Data de início (dd-MM-yyyy): ");
+            hoje = LocalDate.now();
+            if(dataInicio.isBefore(hoje)){
+                System.out.println("A data de início do leilão tem que ser hoje ou depois de hoje!");
+            }
+        } while (dataInicio.isBefore(hoje));
 
         LocalDate dataFim;
         do {
@@ -171,6 +198,37 @@ public class MenuAdminView {
         LeilaoData leilaoData = new LeilaoData();
         leilaoData.salvarLeiloes(leilaoController.listarLeiloes());
         System.out.println("Leilão venda direta criado com sucesso!");
+    }
+
+    private void removerLeilao(){
+        System.out.println(" === Remover Leilão ===");
+        if(!leilaoController.listarLeiloes().isEmpty()) {
+            listarLeiloes();
+        }
+        else{
+            System.out.println("Não existe leilões no momento.");
+            return;
+        }
+
+        System.out.print("\nInsira o ID do leilão que deseja remover: (Insira 0 para voltar): ");
+        int id = scanner.nextInt();
+        scanner.nextLine();
+
+        if(id == 0){
+            System.out.println("A voltar para o menu...");
+            return;
+        }
+
+        if(leilaoController.removerLeilao(id)){
+            System.out.println("Leilão removido com sucesso!");
+        }
+        else{
+            System.out.println("ID inválido!");
+        }
+        LeilaoData leilaoData = new LeilaoData();
+        leilaoData.salvarLeiloes(leilaoController.listarLeiloes());
+
+
     }
 
     // Método para solicitar uma data com validação
@@ -196,7 +254,8 @@ public class MenuAdminView {
         } else {
             // Exibe os detalhes de cada leilão
             for (Leilao leilao : leiloes) {
-                System.out.println("\nTipo de Leilão: " + leilao.getTipoLeilao());
+                System.out.println("\nID: " + leilao.getId());
+                System.out.println("Tipo de Leilão: " + leilao.getTipoLeilao());
                 System.out.println("Nome do Produto: " + leilao.getNomeProduto());
                 System.out.println("Descrição: " + leilao.getDescricao());
                 System.out.println("Data de Início: " + leilao.getDataInicio().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
@@ -210,6 +269,7 @@ public class MenuAdminView {
                 }
             }
         }
+
     }
 
     private void transformarClienteEmAdminPorId() {
