@@ -406,7 +406,7 @@ public class MenuClienteView {
             leilaoData.salvarLeiloes(leilaoController.listarLeiloes());
 
             LanceData lanceData = new LanceData();
-            lanceData.salvarLances(leilaoSelecionado.getLances());
+            lanceData.salvarLances(leilaoController.obterTodosLances());
 
             if (leilaoSelecionado instanceof LeilaoEletronico) {
                 System.out.println("Lances restantes: " + cliente.getLancesDisponiveis());
