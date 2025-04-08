@@ -174,5 +174,13 @@ public class LeilaoController {
         return false;
     }
 
+    public List<Lance> obterTodosLances() {
+        List<Lance> todosLances = new ArrayList<>();
+        for (Leilao leilao : leiloes) {
+            todosLances.addAll(leilao.getLances());
+        }
+        return todosLances;
+    }
+
 
 }
