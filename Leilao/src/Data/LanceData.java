@@ -8,6 +8,7 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class LanceData {
     private static final String FILE_PATH = "data/Lance.csv";
@@ -49,8 +50,12 @@ public class LanceData {
             bw.write("id;clienteId;leilaoId;valor;dataHora");
             bw.newLine();
 
+            List<Lance> lancesOrdenados = lances.stream()
+                    .sorted(Comparator.comparingInt(Lance::getId))
+                    .toList();
+
             // Escreve cada lance no arquivo
-            for (Lance lance : lances) {
+            for (Lance lance : lancesOrdenados) {
                 String linha = String.format(Locale.US,
                         "%d;%d;%d;%.2f;%s",
                         lance.getId(),
