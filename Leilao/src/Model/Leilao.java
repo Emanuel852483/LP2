@@ -15,11 +15,12 @@ public class Leilao {
     private LocalDate dataFim;
     private double valorMinimo;
     private double valorMaximo;
+    private  boolean isAtivo;
     private List<Lance> lances;
     private List<Cliente> clientesInscritos;
 
     // Construtor
-    public Leilao(String nomeProduto, String descricao, String tipoLeilao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, double valorMaximo) {
+    public Leilao(String nomeProduto, String descricao, String tipoLeilao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, double valorMaximo, boolean isAtivo) {
         this.id = proximoId++;
         this.nomeProduto = nomeProduto;
         this.descricao = descricao;
@@ -28,6 +29,7 @@ public class Leilao {
         this.dataFim = dataFim;
         this.valorMinimo = valorMinimo;
         this.valorMaximo = valorMaximo;
+        this.isAtivo = isAtivo;
         this.lances = new ArrayList<>();
         this.clientesInscritos = new ArrayList<>();
     }
@@ -40,6 +42,11 @@ public class Leilao {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+
+    public static void setProximoId(int proximoId) {
+        Leilao.proximoId = proximoId;
     }
 
     public String getNomeProduto() {
@@ -96,6 +103,14 @@ public class Leilao {
 
     public void setValorMaximo(double valorMaximo) {
         this.valorMaximo = valorMaximo;
+    }
+
+    public boolean isAtivo() {
+        return isAtivo;
+    }
+
+    public void setAtivo(boolean ativo) {
+        isAtivo = ativo;
     }
 
     public List<Lance> getLances() {

@@ -5,10 +5,7 @@ import Controller.ClienteController;
 import Data.ClienteData;
 import Data.LanceData;
 import Data.LeilaoData;
-import Model.Cliente;
-import Model.Leilao;
-import Model.Lance;
-import Model.LeilaoEletronico;
+import Model.*;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -16,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
+
 
 public class MenuClienteView {
     private final Cliente cliente;
@@ -139,32 +136,6 @@ public class MenuClienteView {
 
 
 
-        String email = "";
-        boolean emailValido = false;
-
-        while (!emailValido) {
-
-            System.out.print("Novo e-mail (deixe em branco para manter o atual): ");
-            String novoEmail = scanner.nextLine().trim();
-            if (!novoEmail.isBlank()) {
-                cliente.setEmail(novoEmail);
-                emailValido = true;
-            }
-
-            if (!email.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$")) {
-                System.out.println("Formato de e-mail inválido. Use o formato exemplo@dominio.com");
-                continue;
-            }
-
-
-            if (clienteController.existeEmail(email)) {
-                System.out.println("Este e-mail já se encontra cadastrado. Por favor, use outro.");
-            } else {
-                emailValido = true;
-            }
-        }
-
-
         System.out.print("Nova password (deixe em branco para manter a atual): ");
         String novaPassword = scanner.nextLine().trim();
         if (!novaPassword.isBlank()) {
@@ -185,17 +156,18 @@ public class MenuClienteView {
             System.out.println("Você não está inscrito em nenhum leilão.");
         } else {
             System.out.println("\n══════════════════════════════════════════════════════════════════════════════════════════════════════════════");
-            System.out.printf(" %-4s | %-20s | %-20s| %-15s | %-15s | %-15s \n", "ID", "Produto", "Tipo de Leilão", "Data Início", "Data Fim" , "Valor Mínimo");
+            System.out.printf(" %-4s | %-20s | %-20s| %-15s | %-15s | %-15s | | %-15s  \n", "ID", "Produto", "Tipo de Leilão", "Data Início", "Data Fim" , "Valor Mínimo", "Status");
             System.out.println("════════════════════════════════════════════════════════════════════════════════════════════════════════════");
 
             for (Leilao leilao : leiloesInscritos) {
-                System.out.printf(" %-4d | %-20s | %-20s| %-15s | %-15s | %-15s\n",
+                System.out.printf(" %-4d | %-20s | %-20s| %-15s | %-15s | %-15s | %-15s\n",
                         leilao.getId(),
                         leilao.getNomeProduto(),
                         leilao.getTipoLeilao(),
                         leilao.getDataInicio(),
                         leilao.getDataFim(),
-                        leilao.getValorMinimo());
+                        leilao.getValorMinimo(),
+                        leilao.isAtivo() ? "Ativo" : "Inativo");
             }
             System.out.println("══════════════════════════════════════════════════════════════════════════════════════════════════════════");
         }
@@ -254,20 +226,21 @@ public class MenuClienteView {
         if (todosLeiloes.isEmpty()) {
             System.out.println("Não há leilões cadastrados.");
         } else {
-            System.out.println("════════════════════════════════════════════════════════════════════════════");
-            System.out.printf("| %-4s | %-15s | %-20s | %-15s | %-15s |\n", "ID", "Produto", "Tipo de Leilão", "Data de Início", "Data Final");
-            System.out.println("════════════════════════════════════════════════════════════════════════════");
+            System.out.println("════════════════════════════════════════════════════════════════════════════════════════");
+            System.out.printf("| %-4s | %-15s | %-20s | %-15s | %-15s | | %-15s \n", "ID", "Produto", "Tipo de Leilão", "Data de Início", "Data Final", "Status");
+            System.out.println("════════════════════════════════════════════════════════════════════════════════════════");
 
             for (Leilao leilao : todosLeiloes) {
-                System.out.printf("| %-4d | %-15s | %-20s | %-15s | %-15s |\n",
+                System.out.printf("| %-4d | %-15s | %-20s | %-15s | %-15s | %-15s\n",
                         leilao.getId(),
                         leilao.getNomeProduto(),
                         leilao.getTipoLeilao(),
                         leilao.getDataInicio(),
-                        leilao.getDataFim() );
+                        leilao.getDataFim(),
+                        leilao.isAtivo() ? "Ativo" : "Inativo");
             }
 
-            System.out.println("════════════════════════════════════════════════════════════════════════════");
+            System.out.println("════════════════════════════════════════════════════════════════════════════════════════");
 
         }
     }
@@ -332,13 +305,12 @@ public class MenuClienteView {
         verLeiloesInscritos();
         List<Leilao> todosLeiloesInscritos = leilaoController.listarLeiloesPorCliente(cliente);
 
-
         if (todosLeiloesInscritos.isEmpty()) {
             System.out.println("Você não está inscrito em nenhum leilão.");
             return;
         }
 
-        System.out.print("\nDigite o ID do leilão para dar lance (ou 0 para cancelar): ");
+        System.out.print("\nDigite o ID do leilão para licitar (ou 0 para cancelar): ");
         int idLeilao = scanner.nextInt();
         scanner.nextLine();
 
@@ -361,9 +333,8 @@ public class MenuClienteView {
             return;
         }
 
-
         boolean leilaoAtivo = (LocalDate.now().isEqual(leilaoSelecionado.getDataInicio()) || LocalDate.now().isAfter(leilaoSelecionado.getDataInicio())
-                && LocalDate.now().isBefore(leilaoSelecionado.getDataFim()) || LocalDate.now().isEqual(leilaoSelecionado.getDataFim()) );
+                && LocalDate.now().isBefore(leilaoSelecionado.getDataFim()) || LocalDate.now().isEqual(leilaoSelecionado.getDataFim()));
 
         if (!leilaoAtivo) {
             System.out.println("\nEste leilão não está ativo no momento.");
@@ -375,6 +346,31 @@ public class MenuClienteView {
         }
 
 
+        if (leilaoSelecionado instanceof LeilaoVendaDireta) {
+            LeilaoVendaDireta lvd = (LeilaoVendaDireta) leilaoSelecionado;
+
+            System.out.println("\n=== Leilão de Venda Direta ===");
+            System.out.printf("Produto: %s | Valor: %.2f\n",
+                    lvd.getNomeProduto(),
+                    lvd.getValorMinimo());
+
+            while (true) {
+                System.out.print("Deseja adquirir este produto? (S para Sim, N para Não): ");
+                String resposta = scanner.nextLine().trim().toUpperCase();
+
+                if (resposta.equals("S")) {
+                    System.out.println("Produto adquirido com sucesso!");
+                    return;
+                } else if (resposta.equals("N")) {
+                    System.out.println("Operação cancelada.");
+                    return;
+                } else {
+                    System.out.println("Opção inválida. Digite S ou N.");
+                }
+            }
+        }
+
+        // Lógica para outros tipos de leilão (eletrônico e carta fechada)
         if (leilaoSelecionado instanceof LeilaoEletronico) {
             if (cliente.getLancesDisponiveis() <= 0) {
                 System.out.println("Usuário não tem lances disponíveis para leilões eletrônicos.");
@@ -382,7 +378,6 @@ public class MenuClienteView {
                 return;
             }
 
-            // Mostrar informações específicas para leilão eletrônico
             LeilaoEletronico le = (LeilaoEletronico) leilaoSelecionado;
             System.out.println("\n=== Informações do Leilão Eletrônico ===");
             System.out.printf("Valor mínimo: %.2f | Valor máximo: %.2f | Múltiplo: %.2f\n",

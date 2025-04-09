@@ -51,19 +51,33 @@ public class LeilaoController {
     }
 
     // Método para criar um leilão eletrônico
-    public LeilaoEletronico criarLeilaoEletronico(String nomeProduto, String descricao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, double valorMaximo, double multiploLance) {
-        return new LeilaoEletronico(nomeProduto, descricao, dataInicio, dataFim, valorMinimo, valorMaximo, multiploLance);
+    public LeilaoEletronico criarLeilaoEletronico(String nomeProduto, String descricao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, double valorMaximo, double multiploLance, boolean isAtivo) {
+        return new LeilaoEletronico(nomeProduto, descricao, dataInicio, dataFim, valorMinimo, valorMaximo, multiploLance, isAtivo);
     }
 
     // Método para criar um leilão carta fechada
-    public LeilaoCartaFechada criarLeilaoCartaFechada(String nomeProduto, String descricao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo) {
-        return new LeilaoCartaFechada(nomeProduto, descricao, dataInicio, dataFim, valorMinimo);
+    public LeilaoCartaFechada criarLeilaoCartaFechada(String nomeProduto, String descricao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, boolean isAtivo) {
+        return new LeilaoCartaFechada(nomeProduto, descricao, dataInicio, dataFim, valorMinimo, isAtivo);
     }
 
     // Método para criar um leilão venda direta
-    public LeilaoVendaDireta criarLeilaoVendaDireta(String nomeProduto, String descricao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo) {
-        return new LeilaoVendaDireta(nomeProduto, descricao, dataInicio, dataFim, valorMinimo);
+    public LeilaoVendaDireta criarLeilaoVendaDireta(String nomeProduto, String descricao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, boolean isAtivo) {
+        return new LeilaoVendaDireta(nomeProduto, descricao, dataInicio, dataFim, valorMinimo, isAtivo);
+
+
     }
+
+    public boolean verificarStatusLeilao(Leilao leilao) {
+        LocalDate hoje = LocalDate.now();
+        return !hoje.isBefore(leilao.getDataInicio()) && !hoje.isAfter(leilao.getDataFim());
+    }
+
+    public void atualizarStatusLeiloes(List<Leilao> leiloes) {
+        for (Leilao leilao : listarLeiloes()) {
+            leilao.setAtivo(verificarStatusLeilao(leilao));
+        }
+    }
+
 
     public boolean registrarLance(Leilao leilao, Cliente cliente, double valor) {
         if (leilao == null || cliente == null) {
@@ -174,6 +188,7 @@ public class LeilaoController {
         return false;
     }
 
+
     public List<Lance> obterTodosLances() {
         List<Lance> todosLances = new ArrayList<>();
         for (Leilao leilao : leiloes) {
@@ -181,6 +196,5 @@ public class LeilaoController {
         }
         return todosLances;
     }
-
 
 }

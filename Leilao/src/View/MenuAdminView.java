@@ -104,14 +104,18 @@ public class MenuAdminView {
         double multiploLance = scanner.nextDouble();
         scanner.nextLine();
 
+
+        boolean isAtivo = false;
         // Cria o leilão eletrônico
         LeilaoEletronico leilao = leilaoController.criarLeilaoEletronico(
-                nomeProduto, descricao, dataInicio, dataFim, valorMinimo, valorMaximo, multiploLance
+                nomeProduto, descricao, dataInicio, dataFim, valorMinimo, valorMaximo, multiploLance, isAtivo
         );
         leilaoController.adicionarLeilao(leilao);
 
+        List<Leilao> leiloes = leilaoController.listarLeiloes();
+        leilaoController.atualizarStatusLeiloes(leiloes);
         LeilaoData leilaoData = new LeilaoData();
-        leilaoData.salvarLeiloes(leilaoController.listarLeiloes());
+        leilaoData.salvarLeiloes(leiloes);
         System.out.println("Leilão eletrônico criado com sucesso!");
     }
 
@@ -147,14 +151,17 @@ public class MenuAdminView {
         double valorMinimo = scanner.nextDouble();
         scanner.nextLine();
 
+        boolean isAtivo = false;
         // Cria o leilão carta fechada
         LeilaoCartaFechada leilao = leilaoController.criarLeilaoCartaFechada(
-                nomeProduto, descricao, dataInicio, dataFim, valorMinimo
+                nomeProduto, descricao, dataInicio, dataFim, valorMinimo, isAtivo
         );
         leilaoController.adicionarLeilao(leilao);
 
+        List<Leilao> leiloes = leilaoController.listarLeiloes();
+        leilaoController.atualizarStatusLeiloes(leiloes);
         LeilaoData leilaoData = new LeilaoData();
-        leilaoData.salvarLeiloes(leilaoController.listarLeiloes());
+        leilaoData.salvarLeiloes(leiloes);
         System.out.println("Leilão carta fechada criado com sucesso!");
     }
 
@@ -189,14 +196,18 @@ public class MenuAdminView {
         double valorMinimo = scanner.nextDouble();
         scanner.nextLine();
 
+        boolean isAtivo = false;
+
         // Cria o leilão venda direta
         LeilaoVendaDireta leilao = leilaoController.criarLeilaoVendaDireta(
-                nomeProduto, descricao, dataInicio, dataFim, valorMinimo
+                nomeProduto, descricao, dataInicio, dataFim, valorMinimo, isAtivo
         );
         leilaoController.adicionarLeilao(leilao);
 
+        List<Leilao> leiloes = leilaoController.listarLeiloes();
+        leilaoController.atualizarStatusLeiloes(leiloes);
         LeilaoData leilaoData = new LeilaoData();
-        leilaoData.salvarLeiloes(leilaoController.listarLeiloes());
+        leilaoData.salvarLeiloes(leiloes);
         System.out.println("Leilão venda direta criado com sucesso!");
     }
 
@@ -261,6 +272,14 @@ public class MenuAdminView {
                 System.out.println("Data de Início: " + leilao.getDataInicio().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
                 System.out.println("Data de Fim: " + leilao.getDataFim().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
                 System.out.println("Valor Mínimo: " + leilao.getValorMinimo());
+                System.out.println("STATUS: " + (leilao.isAtivo() ? "Ativo" : "Inativo"));
+                System.out.println("Clientes Inscritos:");
+                if (leilao.getClientesInscritos().isEmpty()) {
+                    System.out.println("  Nenhum cliente inscrito");
+                } else {
+                    leilao.getClientesInscritos().forEach(cliente ->
+                            System.out.println("  - " + cliente.getEmail()));
+                }
 
                 if (leilao instanceof LeilaoEletronico) {
                     LeilaoEletronico leilaoEletronico = (LeilaoEletronico) leilao;

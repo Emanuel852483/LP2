@@ -1,5 +1,6 @@
 package Data;
 
+import Controller.LeilaoController;
 import Model.Leilao;
 import Model.Lance;
 import Model.Cliente;
@@ -20,6 +21,7 @@ public class LeilaoData {
     // Método para carregar leilões do ficheiro CSV
     public List<Leilao> carregarLeiloes(List<Cliente> clientes, List<Lance> lances) {
         List<Leilao> leiloes = new ArrayList<>();
+        int maxId = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(FILE_PATH))) {
             String linha;
             br.readLine(); // Ignora o cabeçalho
@@ -27,13 +29,17 @@ public class LeilaoData {
                 String[] dados = linha.split(";", -1); // O -1 mantem campos vazios
 
                 // Verifica número mínimo de campos
-                if (dados.length < 9) {
+                if (dados.length < 11) {
                     System.out.println("Linha ignorada (campos insuficientes): " + linha);
                     continue;
                 }
 
+
                 try {
                     int id = Integer.parseInt(dados[0]);
+                    if (id > maxId) {
+                        maxId = id;
+                    }
                     String nomeProduto = dados[1];
                     String descricao = dados[2];
                     String tipoLeilao = dados[3];
@@ -47,13 +53,16 @@ public class LeilaoData {
                     double multiploLance = (dados.length > 8 && !dados[8].isEmpty()) ?
                             Double.parseDouble(dados[8].replace(",", ".")) : 0.0;
 
+                    boolean isAtivo = Boolean.parseBoolean(dados[9]);
 
-                    List<Integer> lancesIds = (dados.length > 9) ? parseIdList(dados[9]) : new ArrayList<>();
-                    List<Integer> clientesIds = (dados.length > 10) ? parseIdList(dados[10]) : new ArrayList<>();
+                    List<Integer> lancesIds = (dados.length > 10) ? parseIdList(dados[10]) : new ArrayList<>();
+                    List<Integer> clientesIds = (dados.length > 11) ? parseIdList(dados[11]) : new ArrayList<>();
+
+
 
                     // Cria o leilão
                     Leilao leilao = criarLeilaoPorTipo( nomeProduto, descricao, tipoLeilao,
-                            dataInicio, dataFim, valorMinimo, valorMaximo, multiploLance);
+                            dataInicio, dataFim, valorMinimo,isAtivo,valorMaximo, multiploLance);
                     leilao.setId(id);
 
                     // Associa lances e clientes
@@ -66,6 +75,7 @@ public class LeilaoData {
                     e.printStackTrace();
                 }
             }
+            Leilao.setProximoId(maxId + 1);
         } catch (IOException e) {
             System.out.println("Erro ao ler o ficheiro Leiloes.csv: " + e.getMessage());
         }
@@ -74,14 +84,14 @@ public class LeilaoData {
 
     private Leilao criarLeilaoPorTipo(String nome, String desc, String tipo,
                                       LocalDate inicio, LocalDate fim,
-                                      double min, double max, double multiplo) {
+                                      double min, boolean isativo, double max, double multiplo) {
         switch (tipo) {
             case "Eletrônico":
-                return new LeilaoEletronico(nome, desc, inicio, fim, min, max, multiplo);
+                return new LeilaoEletronico(nome, desc, inicio, fim, min, max, multiplo, isativo);
             case "Carta Fechada":
-                return new LeilaoCartaFechada(nome, desc, inicio, fim, min);
+                return new LeilaoCartaFechada(nome, desc, inicio, fim, min, isativo);
             case "Venda Direta":
-                return new LeilaoVendaDireta(nome, desc, inicio, fim, min);
+                return new LeilaoVendaDireta(nome, desc, inicio, fim, min, isativo);
             default:
                 throw new IllegalArgumentException("Tipo de leilão inválido: " + tipo);
         }
@@ -107,10 +117,13 @@ public class LeilaoData {
 
     // Método para salvar leilões no ficheiro CSV
     public void salvarLeiloes(List<Leilao> leiloes) {
+
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_PATH))) {
             // Cabeçalho do arquivo CSV
-            bw.write("id;nomeProduto;descricao;tipoLeilao;dataInicio;dataFim;valorMinimo;valorMaximo;multiploLance;lancesIds;clientesIds");
+            bw.write("id;nomeProduto;descricao;tipoLeilao;dataInicio;dataFim;valorMinimo;valorMaximo;multiploLance;isAtivo;lancesIds;clientesIds");
             bw.newLine();
+
+
 
             // Escreve cada leilão no arquivo
             for (Leilao leilao : leiloes) {
@@ -118,7 +131,7 @@ public class LeilaoData {
                 String clientesIds = leilao.getClientesInscritos().stream().map(c -> String.valueOf(c.getId())).collect(Collectors.joining(","));
 
                 String linha = String.format(Locale.US,
-                        "%d;%s;%s;%s;%s;%s;%.2f;%.2f;%.2f;%s;%s",
+                        "%d;%s;%s;%s;%s;%s;%.2f;%.2f;%.2f;%b;%s;%s",
                         leilao.getId(),
                         leilao.getNomeProduto(),
                         leilao.getDescricao(),
@@ -126,8 +139,9 @@ public class LeilaoData {
                         leilao.getDataInicio().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")),
                         leilao.getDataFim().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")),
                         leilao.getValorMinimo(),
-                        leilao.getValorMaximo(),
+                        leilao instanceof LeilaoEletronico ? leilao.getValorMaximo() : 0,
                         leilao instanceof LeilaoEletronico ? ((LeilaoEletronico) leilao).getMultiploLance() : 0,
+                        leilao.isAtivo(),
                         lancesIds,
                         clientesIds);
                 bw.write(linha);
