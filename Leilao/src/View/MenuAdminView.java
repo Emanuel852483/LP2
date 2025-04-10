@@ -98,17 +98,16 @@ public class MenuAdminView {
 
         System.out.print("Valor mínimo: ");
         double valorMinimo = scanner.nextDouble();
-        System.out.print("Valor máximo: ");
-        double valorMaximo = scanner.nextDouble();
         System.out.print("Múltiplo de lance: ");
         double multiploLance = scanner.nextDouble();
         scanner.nextLine();
 
 
         boolean isAtivo = false;
+        boolean isFechado = false;
         // Cria o leilão eletrônico
         LeilaoEletronico leilao = leilaoController.criarLeilaoEletronico(
-                nomeProduto, descricao, dataInicio, dataFim, valorMinimo, valorMaximo, multiploLance, isAtivo
+                nomeProduto, descricao, dataInicio, dataFim, valorMinimo, multiploLance, isAtivo, isFechado
         );
         leilaoController.adicionarLeilao(leilao);
 
@@ -152,9 +151,10 @@ public class MenuAdminView {
         scanner.nextLine();
 
         boolean isAtivo = false;
+        boolean isFechado = false;
         // Cria o leilão carta fechada
         LeilaoCartaFechada leilao = leilaoController.criarLeilaoCartaFechada(
-                nomeProduto, descricao, dataInicio, dataFim, valorMinimo, isAtivo
+                nomeProduto, descricao, dataInicio, dataFim, valorMinimo, isAtivo, isFechado
         );
         leilaoController.adicionarLeilao(leilao);
 
@@ -192,15 +192,16 @@ public class MenuAdminView {
             }
         } while (dataFim.isBefore(dataInicio));
 
-        System.out.print("Valor mínimo: ");
+        System.out.print("Valor: ");
         double valorMinimo = scanner.nextDouble();
         scanner.nextLine();
 
         boolean isAtivo = false;
+        boolean isFechado = false;
 
         // Cria o leilão venda direta
         LeilaoVendaDireta leilao = leilaoController.criarLeilaoVendaDireta(
-                nomeProduto, descricao, dataInicio, dataFim, valorMinimo, isAtivo
+                nomeProduto, descricao, dataInicio, dataFim, valorMinimo, isAtivo, isFechado
         );
         leilaoController.adicionarLeilao(leilao);
 
@@ -271,21 +272,49 @@ public class MenuAdminView {
                 System.out.println("Descrição: " + leilao.getDescricao());
                 System.out.println("Data de Início: " + leilao.getDataInicio().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
                 System.out.println("Data de Fim: " + leilao.getDataFim().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-                System.out.println("Valor Mínimo: " + leilao.getValorMinimo());
-                System.out.println("STATUS: " + (leilao.isAtivo() ? "Ativo" : "Inativo"));
-                System.out.println("Clientes Inscritos:");
-                if (leilao.getClientesInscritos().isEmpty()) {
-                    System.out.println("  Nenhum cliente inscrito");
-                } else {
-                    leilao.getClientesInscritos().forEach(cliente ->
-                            System.out.println("  - " + cliente.getEmail()));
+                if(leilao instanceof  LeilaoVendaDireta){
+                    System.out.println("Valor: " + leilao.getValorMinimo());
+                    if(!leilao.isFechado()){
+                        System.out.println("STATUS: " + (leilao.isAtivo() ? "Ativo" : "Inativo"));
+                    }else{
+                        System.out.println("STATUS: Fechado " );
+                    }
+                }else if(leilao instanceof LeilaoEletronico leilaoEletronico){
+                    System.out.println("Valor Mínimo: " + leilao.getValorMinimo());
+                    System.out.println("Múltiplo de Lance: " + leilaoEletronico.getMultiploLance());
+                    if(!leilao.isFechado()){
+                        System.out.println("STATUS: " + (leilao.isAtivo() ? "Ativo" : "Inativo"));
+                    }else{
+                        System.out.println("STATUS: Fechado " );
+                    }
+                    System.out.println("Clientes Inscritos:");
+
+                    if (leilao.getClientesInscritos().isEmpty()) {
+                        System.out.println("  Nenhum cliente inscrito");
+                    } else {
+                        leilao.getClientesInscritos().forEach(cliente ->
+                                System.out.println("  - " + cliente.getEmail()));
+                    }
+
+                }else{
+                    System.out.println("Valor Mínimo: " + leilao.getValorMinimo());
+                    if(!leilao.isFechado()){
+                        System.out.println("STATUS: " + (leilao.isAtivo() ? "Ativo" : "Inativo"));
+                    }else{
+                        System.out.println("STATUS: Fechado " );
+                    }
+                    System.out.println("Clientes Inscritos:");
+
+                    if (leilao.getClientesInscritos().isEmpty()) {
+                        System.out.println("  Nenhum cliente inscrito");
+                    } else {
+                        leilao.getClientesInscritos().forEach(cliente ->
+                                System.out.println("  - " + cliente.getEmail()));
+                    }
                 }
 
-                if (leilao instanceof LeilaoEletronico) {
-                    LeilaoEletronico leilaoEletronico = (LeilaoEletronico) leilao;
-                    System.out.println("Valor Máximo: " + leilaoEletronico.getValorMaximo());
-                    System.out.println("Múltiplo de Lance: " + leilaoEletronico.getMultiploLance());
-                }
+
+
             }
         }
 
