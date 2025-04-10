@@ -35,6 +35,7 @@ public class LeilaoController {
         return false;
     }
 
+
     // Método para buscar um leilão pelo id
     public Leilao buscarLeilaoPorId(int id) {
         for (Leilao leilao : leiloes) {
@@ -51,18 +52,18 @@ public class LeilaoController {
     }
 
     // Método para criar um leilão eletrônico
-    public LeilaoEletronico criarLeilaoEletronico(String nomeProduto, String descricao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, double valorMaximo, double multiploLance, boolean isAtivo) {
-        return new LeilaoEletronico(nomeProduto, descricao, dataInicio, dataFim, valorMinimo, valorMaximo, multiploLance, isAtivo);
+    public LeilaoEletronico criarLeilaoEletronico(String nomeProduto, String descricao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, double multiploLance, boolean isAtivo, boolean isFechado) {
+        return new LeilaoEletronico(nomeProduto, descricao, dataInicio, dataFim, valorMinimo, multiploLance, isAtivo, isFechado);
     }
 
     // Método para criar um leilão carta fechada
-    public LeilaoCartaFechada criarLeilaoCartaFechada(String nomeProduto, String descricao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, boolean isAtivo) {
-        return new LeilaoCartaFechada(nomeProduto, descricao, dataInicio, dataFim, valorMinimo, isAtivo);
+    public LeilaoCartaFechada criarLeilaoCartaFechada(String nomeProduto, String descricao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, boolean isAtivo, boolean isFechado) {
+        return new LeilaoCartaFechada(nomeProduto, descricao, dataInicio, dataFim, valorMinimo, isAtivo, isFechado);
     }
 
     // Método para criar um leilão venda direta
-    public LeilaoVendaDireta criarLeilaoVendaDireta(String nomeProduto, String descricao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, boolean isAtivo) {
-        return new LeilaoVendaDireta(nomeProduto, descricao, dataInicio, dataFim, valorMinimo, isAtivo);
+    public LeilaoVendaDireta criarLeilaoVendaDireta(String nomeProduto, String descricao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, boolean isAtivo, boolean isFechado) {
+        return new LeilaoVendaDireta(nomeProduto, descricao, dataInicio, dataFim, valorMinimo, isAtivo, isFechado);
 
 
     }
@@ -161,16 +162,14 @@ public class LeilaoController {
     public List<Leilao> listarLeiloesATerminar() {
         LocalDate hoje = LocalDate.now();
         return leiloes.stream()
-                .filter(leilao -> leilao.getDataFim() != null && leilao.getDataFim().isAfter(hoje) && leilao.getDataFim().isBefore(hoje.plusDays(7))) // Leilões que terminam em até 7 dias
+                .filter(leilao -> leilao.getDataFim() != null && leilao.getDataFim().isAfter(hoje) && leilao.getDataFim().isBefore(hoje.plusDays(7)) && leilao.isAtivo() && !leilao.isFechado()) // Leilões que terminam em até 7 dias
                 .collect(Collectors.toList());
     }
 
-    // Método para listar leilões ativos (data início <= hoje <= data fim)
+    // Método para listar leilões ativos
     public List<Leilao> listarLeiloesAtivos() {
-        LocalDate hoje = LocalDate.now();
         return leiloes.stream()
-                .filter(leilao -> (leilao.getDataInicio() == null || leilao.getDataInicio().isBefore(hoje) || leilao.getDataInicio().isEqual(hoje))
-                        && (leilao.getDataFim() == null || leilao.getDataFim().isAfter(hoje) || leilao.getDataFim().isEqual(hoje)))
+                .filter(Leilao::isAtivo)
                 .collect(Collectors.toList());
     }
 

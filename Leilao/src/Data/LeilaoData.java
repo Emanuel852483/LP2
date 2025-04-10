@@ -48,21 +48,19 @@ public class LeilaoData {
                     double valorMinimo = Double.parseDouble(dados[6].replace(",", "."));
 
 
-                    double valorMaximo = (dados.length > 7 && !dados[7].isEmpty()) ?
-                            Double.parseDouble(dados[7].replace(",", ".")) : 0.0;
-                    double multiploLance = (dados.length > 8 && !dados[8].isEmpty()) ?
-                            Double.parseDouble(dados[8].replace(",", ".")) : 0.0;
+                    double multiploLance = !dados[7].isEmpty() ? Double.parseDouble(dados[7].replace(",", ".")) : 0.0;
 
-                    boolean isAtivo = Boolean.parseBoolean(dados[9]);
+                    boolean isAtivo = Boolean.parseBoolean(dados[8]);
+                    boolean isFechado = Boolean.parseBoolean(dados[9]);
 
-                    List<Integer> lancesIds = (dados.length > 10) ? parseIdList(dados[10]) : new ArrayList<>();
-                    List<Integer> clientesIds = (dados.length > 11) ? parseIdList(dados[11]) : new ArrayList<>();
+                    List<Integer> lancesIds = !dados[10].isEmpty() ? parseIdList(dados[10]) : new ArrayList<>();
+                    List<Integer> clientesIds = !dados[11].isEmpty() ? parseIdList(dados[11]) : new ArrayList<>();
 
 
 
                     // Cria o leilão
                     Leilao leilao = criarLeilaoPorTipo( nomeProduto, descricao, tipoLeilao,
-                            dataInicio, dataFim, valorMinimo,isAtivo,valorMaximo, multiploLance);
+                            dataInicio, dataFim, valorMinimo,isAtivo, isFechado, multiploLance);
                     leilao.setId(id);
 
                     // Associa lances e clientes
@@ -84,14 +82,14 @@ public class LeilaoData {
 
     private Leilao criarLeilaoPorTipo(String nome, String desc, String tipo,
                                       LocalDate inicio, LocalDate fim,
-                                      double min, boolean isativo, double max, double multiplo) {
+                                      double min, boolean isativo, boolean isfechado, double multiplo) {
         switch (tipo) {
             case "Eletrônico":
-                return new LeilaoEletronico(nome, desc, inicio, fim, min, max, multiplo, isativo);
+                return new LeilaoEletronico(nome, desc, inicio, fim, min, multiplo, isativo, isfechado);
             case "Carta Fechada":
-                return new LeilaoCartaFechada(nome, desc, inicio, fim, min, isativo);
+                return new LeilaoCartaFechada(nome, desc, inicio, fim, min, isativo, isfechado);
             case "Venda Direta":
-                return new LeilaoVendaDireta(nome, desc, inicio, fim, min, isativo);
+                return new LeilaoVendaDireta(nome, desc, inicio, fim, min, isativo, isfechado);
             default:
                 throw new IllegalArgumentException("Tipo de leilão inválido: " + tipo);
         }
@@ -120,7 +118,7 @@ public class LeilaoData {
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_PATH))) {
             // Cabeçalho do arquivo CSV
-            bw.write("id;nomeProduto;descricao;tipoLeilao;dataInicio;dataFim;valorMinimo;valorMaximo;multiploLance;isAtivo;lancesIds;clientesIds");
+            bw.write("id;nomeProduto;descricao;tipoLeilao;dataInicio;dataFim;valorMinimo;multiploLance;isAtivo;isFechado;lancesIds;clientesIds");
             bw.newLine();
 
 
@@ -131,7 +129,7 @@ public class LeilaoData {
                 String clientesIds = leilao.getClientesInscritos().stream().map(c -> String.valueOf(c.getId())).collect(Collectors.joining(","));
 
                 String linha = String.format(Locale.US,
-                        "%d;%s;%s;%s;%s;%s;%.2f;%.2f;%.2f;%b;%s;%s",
+                        "%d;%s;%s;%s;%s;%s;%.2f;%.2f;%b;%b;%s;%s",
                         leilao.getId(),
                         leilao.getNomeProduto(),
                         leilao.getDescricao(),
@@ -139,9 +137,9 @@ public class LeilaoData {
                         leilao.getDataInicio().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")),
                         leilao.getDataFim().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")),
                         leilao.getValorMinimo(),
-                        leilao instanceof LeilaoEletronico ? leilao.getValorMaximo() : 0,
                         leilao instanceof LeilaoEletronico ? ((LeilaoEletronico) leilao).getMultiploLance() : 0,
                         leilao.isAtivo(),
+                        leilao.isFechado(),
                         lancesIds,
                         clientesIds);
                 bw.write(linha);

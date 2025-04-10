@@ -14,13 +14,13 @@ public class Leilao {
     private LocalDate dataInicio;
     private LocalDate dataFim;
     private double valorMinimo;
-    private double valorMaximo;
     private  boolean isAtivo;
+    private boolean isFechado;
     private List<Lance> lances;
     private List<Cliente> clientesInscritos;
 
     // Construtor
-    public Leilao(String nomeProduto, String descricao, String tipoLeilao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, double valorMaximo, boolean isAtivo) {
+    public Leilao(String nomeProduto, String descricao, String tipoLeilao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, boolean isAtivo, boolean isFechado) {
         this.id = proximoId++;
         this.nomeProduto = nomeProduto;
         this.descricao = descricao;
@@ -28,8 +28,8 @@ public class Leilao {
         this.dataInicio = dataInicio;
         this.dataFim = dataFim;
         this.valorMinimo = valorMinimo;
-        this.valorMaximo = valorMaximo;
         this.isAtivo = isAtivo;
+        this.isFechado = isFechado;
         this.lances = new ArrayList<>();
         this.clientesInscritos = new ArrayList<>();
     }
@@ -97,13 +97,6 @@ public class Leilao {
         this.valorMinimo = valorMinimo;
     }
 
-    public double getValorMaximo() {
-        return valorMaximo;
-    }
-
-    public void setValorMaximo(double valorMaximo) {
-        this.valorMaximo = valorMaximo;
-    }
 
     public boolean isAtivo() {
         return isAtivo;
@@ -111,6 +104,14 @@ public class Leilao {
 
     public void setAtivo(boolean ativo) {
         isAtivo = ativo;
+    }
+
+    public boolean isFechado() {
+        return isFechado;
+    }
+
+    public void setFechado(boolean fechado) {
+        isFechado = fechado;
     }
 
     public List<Lance> getLances() {
