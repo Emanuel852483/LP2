@@ -1,34 +1,42 @@
-import Controller.NotificacaoController;
-import java.util.Scanner;
+import Controller.ClienteController;
+import Controller.LeilaoController;
+import Data.ClienteData;
+import Data.LeilaoData;
+import Data.LanceData;
+import Model.Cliente;
+import Model.Leilao;
+import Model.Lance;
+import View.MenuPrincipalView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
 
-        Scanner scanner = new Scanner(System.in);
-        NotificacaoController notificacaoController = new NotificacaoController();
+        ClienteController clienteController = new ClienteController();
+        LeilaoController leilaoController = new LeilaoController();
 
-        System.out.println("===== FORMULÁRIO DE REGISTO =====");
 
-        System.out.print("Nome: ");
-        String nomeDoUtilizador = scanner.nextLine();
+        ClienteData clienteData = new ClienteData();
+        List<Cliente> clientes = clienteData.carregarClientes();
+        clienteController.setClientes(clientes);
 
-        System.out.print("Email: ");
-        String emailDoUtilizador = scanner.nextLine();
+        LeilaoData leilaoData = new LeilaoData();
+        List<Leilao> leiloes = leilaoData.carregarLeiloes(clientes, new ArrayList<>()); // Passa lista vazia de lances inicialmente
+        leilaoController.verificarStatusLeiloes(leiloes);
+        leilaoController.setLeiloes(leiloes);
 
-        // Verificação básica do formato do e-mail
-        if (!emailDoUtilizador.matches("^[\\w.-]+@[\\w.-]+\\.\\w{2,}$")) {
-            System.out.println("Email inválido! Por favor, insira um e-mail válido.");
-        } else {
-            // Tenta enviar o e-mail
-            boolean enviado = notificacaoController.enviarEmail(emailDoUtilizador, nomeDoUtilizador);
 
-            if (enviado) {
-                System.out.println("Registo concluído. Verifique o seu e-mail para a mensagem de boas-vindas!");
-            } else {
-                System.out.println("Ocorreu um erro ao enviar o e-mail. Tente novamente mais tarde.");
-            }
-        }
+        LanceData lanceData = new LanceData();
+        List<Lance> lances = lanceData.carregarLances(clientes, leiloes);
 
-        scanner.close();
+        leiloes = leilaoData.carregarLeiloes(clientes, lances);
+        leilaoController.verificarStatusLeiloes(leiloes);
+        leilaoController.setLeiloes(leiloes);
+
+
+        MenuPrincipalView menuPrincipal = new MenuPrincipalView(clienteController, leilaoController);
+        menuPrincipal.exibirMenu();
     }
 }
