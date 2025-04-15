@@ -112,9 +112,8 @@ public class MenuAdminView {
         leilaoController.adicionarLeilao(leilao);
 
         List<Leilao> leiloes = leilaoController.listarLeiloes();
-        leilaoController.atualizarStatusLeiloes(leiloes);
-        LeilaoData leilaoData = new LeilaoData();
-        leilaoData.salvarLeiloes(leiloes);
+        leilaoController.verificarStatusLeiloes(leiloes);
+        LeilaoData.salvarLeiloes(leiloes);
         System.out.println("Leilão eletrônico criado com sucesso!");
     }
 
@@ -159,9 +158,8 @@ public class MenuAdminView {
         leilaoController.adicionarLeilao(leilao);
 
         List<Leilao> leiloes = leilaoController.listarLeiloes();
-        leilaoController.atualizarStatusLeiloes(leiloes);
-        LeilaoData leilaoData = new LeilaoData();
-        leilaoData.salvarLeiloes(leiloes);
+        leilaoController.verificarStatusLeiloes(leiloes);
+        LeilaoData.salvarLeiloes(leiloes);
         System.out.println("Leilão carta fechada criado com sucesso!");
     }
 
@@ -206,9 +204,8 @@ public class MenuAdminView {
         leilaoController.adicionarLeilao(leilao);
 
         List<Leilao> leiloes = leilaoController.listarLeiloes();
-        leilaoController.atualizarStatusLeiloes(leiloes);
-        LeilaoData leilaoData = new LeilaoData();
-        leilaoData.salvarLeiloes(leiloes);
+        leilaoController.verificarStatusLeiloes(leiloes);
+        LeilaoData.salvarLeiloes(leiloes);
         System.out.println("Leilão venda direta criado com sucesso!");
     }
 
@@ -237,8 +234,8 @@ public class MenuAdminView {
         else{
             System.out.println("ID inválido!");
         }
-        LeilaoData leilaoData = new LeilaoData();
-        leilaoData.salvarLeiloes(leilaoController.listarLeiloes());
+
+        LeilaoData.salvarLeiloes(leilaoController.listarLeiloes());
 
 
     }

@@ -113,8 +113,10 @@ public class LeilaoData {
         }
     }
 
+
+
     // Método para salvar leilões no ficheiro CSV
-    public void salvarLeiloes(List<Leilao> leiloes) {
+    public static void salvarLeiloes(List<Leilao> leiloes) {
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_PATH))) {
             // Cabeçalho do arquivo CSV
@@ -149,6 +151,9 @@ public class LeilaoData {
             System.out.println("Erro ao salvar o ficheiro Leiloes.csv: " + e.getMessage());
         }
     }
+
+
+
 
     // Método auxiliar para converter uma lista de IDs separada por vírgula em uma lista de inteiros
     private List<Integer> parseIdList(String ids) {

@@ -24,6 +24,7 @@ public class Main {
 
         LeilaoData leilaoData = new LeilaoData();
         List<Leilao> leiloes = leilaoData.carregarLeiloes(clientes, new ArrayList<>()); // Passa lista vazia de lances inicialmente
+        leilaoController.verificarStatusLeiloes(leiloes);
         leilaoController.setLeiloes(leiloes);
 
 
@@ -31,6 +32,7 @@ public class Main {
         List<Lance> lances = lanceData.carregarLances(clientes, leiloes);
 
         leiloes = leilaoData.carregarLeiloes(clientes, lances);
+        leilaoController.verificarStatusLeiloes(leiloes);
         leilaoController.setLeiloes(leiloes);
 
 

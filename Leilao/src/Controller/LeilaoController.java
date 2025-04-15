@@ -1,6 +1,7 @@
 package Controller;
 
 import Model.*;
+import Data.LeilaoData;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -47,7 +48,8 @@ public class LeilaoController {
     }
 
     // Método para listar todos os leilões
-    public List<Leilao> listarLeiloes() {
+    public List<Leilao> listarLeiloes()
+    {
         return leiloes;
     }
 
@@ -68,24 +70,34 @@ public class LeilaoController {
 
     }
 
-    public boolean verificarStatusLeilao(Leilao leilao) {
+    public void verificarStatusLeiloes(List<Leilao> leiloes) {
         LocalDate hoje = LocalDate.now();
-        return !hoje.isBefore(leilao.getDataInicio()) && !hoje.isAfter(leilao.getDataFim());
-    }
+        boolean modificado = false;
 
-    public void atualizarStatusLeiloes(List<Leilao> leiloes) {
-        for (Leilao leilao : listarLeiloes()) {
-            leilao.setAtivo(verificarStatusLeilao(leilao));
+        for (Leilao leilao : leiloes) {
+            boolean deveriaEstarAtivo = !hoje.isBefore(leilao.getDataInicio()) &&
+                    !hoje.isAfter(leilao.getDataFim());
+            boolean deveriaEstarFechado = hoje.isAfter(leilao.getDataFim());
+
+            if (leilao.isAtivo() != deveriaEstarAtivo ||
+                    leilao.isFechado() != deveriaEstarFechado) {
+
+                leilao.setAtivo(deveriaEstarAtivo && !deveriaEstarFechado);
+                leilao.setFechado(deveriaEstarFechado);
+                modificado = true;
+            }
+        }
+
+        if (modificado) {
+            LeilaoData.salvarLeiloes(leiloes);
         }
     }
-
 
     public boolean registrarLance(Leilao leilao, Cliente cliente, double valor) {
         if (leilao == null || cliente == null) {
             return false;
         }
 
-        // Verifica o tipo de leilão e aplica as regras específicas
         if (leilao instanceof LeilaoEletronico) {
             return registrarLanceEletronico((LeilaoEletronico) leilao, cliente, valor);
         } else if (leilao instanceof LeilaoCartaFechada) {

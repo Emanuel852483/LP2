@@ -331,8 +331,7 @@ public class MenuClienteView {
             boolean inscrito = leilaoController.inscreverClienteEmLeilao(leilao, cliente);
 
             if (inscrito) {
-                LeilaoData leilaoData = new LeilaoData();
-                leilaoData.salvarLeiloes(leilaoController.listarLeiloes());
+                LeilaoData.salvarLeiloes(leilaoController.listarLeiloes());
 
                 System.out.println("Inscrição realizada com sucesso no leilão: " + leilao.getNomeProduto());
             } else {
@@ -438,8 +437,7 @@ public class MenuClienteView {
                     lvd.setAtivo(false);
                     lvd.setFechado(true);
 
-                    LeilaoData leilaoData = new LeilaoData();
-                    leilaoData.salvarLeiloes(leilaoController.listarLeiloes());
+                    LeilaoData.salvarLeiloes(leilaoController.listarLeiloes());
                     return;
 
                 } else if (resposta.equals("N")) {
@@ -478,8 +476,8 @@ public class MenuClienteView {
         if (sucesso) {
             System.out.println("\nLance registrado com sucesso!");
 
-            LeilaoData leilaoData = new LeilaoData();
-            leilaoData.salvarLeiloes(leilaoController.listarLeiloes());
+
+            LeilaoData.salvarLeiloes(leilaoController.listarLeiloes());
 
             LanceData lanceData = new LanceData();
             lanceData.salvarLances(leilaoController.obterTodosLances());
