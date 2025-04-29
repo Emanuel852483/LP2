@@ -2,6 +2,7 @@ package View;
 
 import Controller.ClienteController;
 import Controller.LeilaoController;
+import Controller.NotificacaoController;
 import Data.ClienteData;
 import Model.Cliente;
 import java.time.LocalDate;
@@ -146,6 +147,9 @@ public class MenuPrincipalView {
 
         ClienteData clienteData = new ClienteData();
         clienteData.salvarClientes(clienteController.listarClientes());
+
+        NotificacaoController notificacaoController = new NotificacaoController();
+        boolean emailEnviado = notificacaoController.enviarEmail(email, nome);
     }
 
 
