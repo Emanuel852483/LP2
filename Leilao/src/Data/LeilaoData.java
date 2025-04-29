@@ -97,19 +97,23 @@ public class LeilaoData {
 
     private void associarLances(Leilao leilao, List<Integer> lancesIds, List<Lance> todosLances) {
         for (int id : lancesIds) {
-            todosLances.stream()
-                    .filter(l -> l.getId() == id)
-                    .findFirst()
-                    .ifPresent(leilao.getLances()::add);
+            for (Lance lance : todosLances) {
+                if (lance.getId() == id) {
+                    leilao.getLances().add(lance);
+                    break;
+                }
+            }
         }
     }
 
     private void associarClientes(Leilao leilao, List<Integer> clientesIds, List<Cliente> todosClientes) {
         for (int id : clientesIds) {
-            todosClientes.stream()
-                    .filter(c -> c.getId() == id)
-                    .findFirst()
-                    .ifPresent(leilao.getClientesInscritos()::add);
+            for (Cliente cliente : todosClientes) {
+                if (cliente.getId() == id) {
+                    leilao.getClientesInscritos().add(cliente);
+                    break;
+                }
+            }
         }
     }
 
