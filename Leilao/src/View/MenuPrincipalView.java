@@ -2,13 +2,13 @@ package View;
 
 import Controller.ClienteController;
 import Controller.LeilaoController;
-import Controller.NotificacaoController;
 import Data.ClienteData;
 import Model.Cliente;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Scanner;
 
 public class MenuPrincipalView {
@@ -23,12 +23,14 @@ public class MenuPrincipalView {
         this.scanner = new Scanner(System.in);
     }
 
+
+
     // Método para exibir o menu principal
     public void exibirMenu() {
         while (true) {
             System.out.println("\n=== Menu Principal ===");
             System.out.println("1. Login");
-            System.out.println("2. Registrar Novo Cliente");
+            System.out.println("2. Registar Novo Cliente");
             System.out.println("3. Sair");
             System.out.print("Escolha uma opção: ");
 
@@ -136,20 +138,20 @@ public class MenuPrincipalView {
         System.out.print("Password: ");
         String password = scanner.nextLine().trim();
 
-        // Define um valor padrão para lancesDisponiveis (por exemplo, 0)
-        int lancesDisponiveis = 0;
 
-        // Cria e adiciona o novo cliente
+        int lancesDisponiveis = 0;
         boolean isAdmin = false;
-        Cliente novoCliente = clienteController.criarCliente(nome, morada, dataNascimento, email, password, lancesDisponiveis,isAdmin);
-        clienteController.adicionarCliente(novoCliente);
+        double saldo = 0;
+        Cliente novoCliente = clienteController.criarCliente(nome, morada, dataNascimento, email, password, lancesDisponiveis,isAdmin,saldo);
+        boolean sucesso = clienteController.adicionarCliente(novoCliente);
+        if (!sucesso) {
+            System.err.println("Erro: Não foi possível adicionar o cliente!");
+            return;
+        }
         System.out.println("Cliente registrado com sucesso!");
 
         ClienteData clienteData = new ClienteData();
         clienteData.salvarClientes(clienteController.listarClientes());
-
-        NotificacaoController notificacaoController = new NotificacaoController();
-        boolean emailEnviado = notificacaoController.enviarEmail(email, nome);
     }
 
 
