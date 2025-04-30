@@ -10,7 +10,7 @@ public class NotificacaoController {
 
         final String SMTP_HOST = "smtp.gmail.com";
         final String remetenteEmail = "emanuelmaia75@gmail.com";
-        final String password = "dtzg vcmm wcsy oewc";
+        final String password = "dtzg vcmm wcsy oewc"; // Usa uma app password segura
 
         Properties properties = new Properties();
         properties.put("mail.smtp.auth", "true");
@@ -30,12 +30,22 @@ public class NotificacaoController {
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(remetenteEmail));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));
-            message.setSubject("Bem-vindo ao Nosso Serviço!");
-            message.setText("Olá, " + nome + ",\n\nObrigado por se registar no nosso serviço! É um prazer tê-lo connosco.\n\nCom os melhores cumprimentos,\nEquipa de Suporte");
+            message.setSubject("Bem-vindo à nossa plataforma!");
+
+            String htmlContent = "<!DOCTYPE html>"
+                    + "<html><body style='font-family: Arial, sans-serif; background-color: #ffffff; padding: 20px; color: #333;'>"
+                    + "<h2>Olá, " + nome + "!</h2>"
+                    + "<p>Bem-vindo(a) à nossa plataforma.</p>"
+                    + "<p>Obrigado por se registar. Estamos felizes por tê-lo(a) connosco.</p>"
+                    + "<p>— Equipa de Suporte</p>"
+                    + "</body></html>";
+
+            message.setContent(htmlContent, "text/html; charset=utf-8");
 
             Transport.send(message);
             System.out.println("E-mail de boas-vindas enviado para: " + destinatario);
             return true;
+
         } catch (MessagingException e) {
             System.out.println("Erro ao enviar e-mail: " + e.getMessage());
             return false;
