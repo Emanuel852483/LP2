@@ -1,3 +1,4 @@
+
 package Model;
 
 import java.time.LocalDate;
@@ -13,9 +14,10 @@ public class Cliente {
     private String password;
     private int lancesDisponiveis;
     private boolean isAdmin;
+    private double saldo;
 
     // Construtor
-    public Cliente(String nome, String morada, LocalDate dataNascimento, String email, String password, int lancesDisponiveis, boolean isAdmin) {
+    public Cliente(String nome, String morada, LocalDate dataNascimento, String email, String password, int lancesDisponiveis, boolean isAdmin, double saldo) {
         this.id = proximoId++; // Atribui o próximo ID e incrementa o contador
         this.nome = nome;
         this.morada = morada;
@@ -24,6 +26,7 @@ public class Cliente {
         this.password = password;
         this.lancesDisponiveis = lancesDisponiveis;
         this.isAdmin = isAdmin;
+        this.saldo = saldo;
     }
 
     // Getters e Setters
@@ -91,5 +94,13 @@ public class Cliente {
 
     public void setAdmin(boolean admin) {
         isAdmin = admin;
+    }
+
+    public double getSaldo() {
+        return saldo;
+    }
+
+    public void setSaldo(double saldo) {
+        this.saldo = saldo;
     }
 }

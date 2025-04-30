@@ -109,7 +109,11 @@ public class MenuAdminView {
         LeilaoEletronico leilao = leilaoController.criarLeilaoEletronico(
                 nomeProduto, descricao, dataInicio, dataFim, valorMinimo, multiploLance, isAtivo, isFechado
         );
-        leilaoController.adicionarLeilao(leilao);
+        boolean adicionado = leilaoController.adicionarLeilao(leilao);
+        if (!adicionado) {
+            System.err.println("Erro: Não foi possível adicionar o leilão!");
+            return;
+        }
 
         List<Leilao> leiloes = leilaoController.listarLeiloes();
         leilaoController.verificarStatusLeiloes(leiloes);
@@ -155,7 +159,11 @@ public class MenuAdminView {
         LeilaoCartaFechada leilao = leilaoController.criarLeilaoCartaFechada(
                 nomeProduto, descricao, dataInicio, dataFim, valorMinimo, isAtivo, isFechado
         );
-        leilaoController.adicionarLeilao(leilao);
+        boolean adicionado = leilaoController.adicionarLeilao(leilao);
+        if (!adicionado) {
+            System.err.println("Erro: Não foi possível adicionar o leilão!");
+            return;
+        }
 
         List<Leilao> leiloes = leilaoController.listarLeiloes();
         leilaoController.verificarStatusLeiloes(leiloes);
@@ -201,7 +209,11 @@ public class MenuAdminView {
         LeilaoVendaDireta leilao = leilaoController.criarLeilaoVendaDireta(
                 nomeProduto, descricao, dataInicio, dataFim, valorMinimo, isAtivo, isFechado
         );
-        leilaoController.adicionarLeilao(leilao);
+        boolean adicionado = leilaoController.adicionarLeilao(leilao);
+        if (!adicionado) {
+            System.err.println("Erro: Não foi possível adicionar o leilão!");
+            return;
+        }
 
         List<Leilao> leiloes = leilaoController.listarLeiloes();
         leilaoController.verificarStatusLeiloes(leiloes);

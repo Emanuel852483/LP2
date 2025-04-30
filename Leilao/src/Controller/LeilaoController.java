@@ -22,8 +22,8 @@ public class LeilaoController {
     }
 
     // Método para adicionar um leilão
-    public void adicionarLeilao(Leilao leilao) {
-        leiloes.add(leilao);
+    public boolean adicionarLeilao(Leilao leilao) {
+        return leiloes.add(leilao);
     }
 
     // Método para remover um leilão
@@ -75,6 +75,10 @@ public class LeilaoController {
         boolean modificado = false;
 
         for (Leilao leilao : leiloes) {
+            if (leilao instanceof LeilaoVendaDireta && leilao.isFechado()) {
+                continue; // Não altera leilões de venda direta já comprados
+            }
+
             boolean deveriaEstarAtivo = !hoje.isBefore(leilao.getDataInicio()) &&
                     !hoje.isAfter(leilao.getDataFim());
             boolean deveriaEstarFechado = hoje.isAfter(leilao.getDataFim());
@@ -92,6 +96,8 @@ public class LeilaoController {
             LeilaoData.salvarLeiloes(leiloes);
         }
     }
+
+
 
     public boolean registrarLance(Leilao leilao, Cliente cliente, double valor) {
         if (leilao == null || cliente == null) {
@@ -174,7 +180,7 @@ public class LeilaoController {
     public List<Leilao> listarLeiloesATerminar() {
         LocalDate hoje = LocalDate.now();
         return leiloes.stream()
-                .filter(leilao -> leilao.getDataFim() != null && leilao.getDataFim().isAfter(hoje) && leilao.getDataFim().isBefore(hoje.plusDays(7)) && leilao.isAtivo() && !leilao.isFechado()) // Leilões que terminam em até 7 dias
+                .filter(leilao -> leilao.getDataFim() != null && leilao.getDataFim().isAfter(hoje) && leilao.getDataFim().isBefore(hoje.plusDays(7)) && leilao.isAtivo() && !leilao.isFechado() || leilao.getDataFim().isEqual(hoje)) // Leilões que terminam em até 7 dias
                 .collect(Collectors.toList());
     }
 
