@@ -20,14 +20,14 @@ public class ClienteController {
     }
 
     // Método para criar um cliente
-    public Cliente criarCliente(String nome, String morada, LocalDate dataNascimento, String email, String password, int lancesDisponiveis, boolean isAdmin) {
-        return new Cliente(nome, morada, dataNascimento, email, password, lancesDisponiveis,isAdmin);
+    public Cliente criarCliente(String nome, String morada, LocalDate dataNascimento, String email, String password, int lancesDisponiveis, boolean isAdmin, double saldo) {
+        return new Cliente(nome, morada, dataNascimento, email, password, lancesDisponiveis,isAdmin,saldo);
     }
 
 
     // Método para adicionar um cliente
-    public void adicionarCliente(Cliente cliente) {
-        clientes.add(cliente);
+    public boolean adicionarCliente(Cliente cliente) {
+        return clientes.add(cliente);
     }
 
     // Método para remover um cliente
@@ -35,7 +35,7 @@ public class ClienteController {
         clientes.remove(cliente);
     }
 
-    // Método para buscar um cliente pelo e-mail
+
     public Cliente buscarClientePorEmail(String email) {
         for (Cliente cliente : clientes) {
             if (cliente.getEmail().equalsIgnoreCase(email)) {
@@ -54,7 +54,6 @@ public class ClienteController {
         return false;
     }
 
-    // Método para verificar a senha de um cliente
     public boolean verificarPassword(Cliente cliente, String password) {
         if (cliente != null) {
             return cliente.getPassword().equals(password);
@@ -88,6 +87,7 @@ public class ClienteController {
         }
         return false;
     }
+
 
     // Método para listar todos os clientes
     public List<Cliente> listarClientes() {
