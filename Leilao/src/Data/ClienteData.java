@@ -25,10 +25,11 @@ public class ClienteData {
                 String email = dados[4];
                 String password = dados[5];
                 int lancesDisponiveis = Integer.parseInt(dados[6]);
-                boolean isAdmin = Boolean.parseBoolean(dados[7]); // Lê o campo isAdmin
+                boolean isAdmin = Boolean.parseBoolean(dados[7]);
+                double saldo = Double.parseDouble(dados[8].replace(",","."));
 
                 // Cria o cliente
-                Cliente cliente = new Cliente(nome, morada, dataNascimento, email, password, lancesDisponiveis, isAdmin);
+                Cliente cliente = new Cliente(nome, morada, dataNascimento, email, password, lancesDisponiveis, isAdmin, saldo);
                 cliente.setId(id); // Define o ID manualmente
                 clientes.add(cliente);
             }
@@ -39,15 +40,15 @@ public class ClienteData {
     }
 
     // Método para salvar clientes no ficheiro CSV
-    public void salvarClientes(List<Cliente> clientes) {
+    public static void salvarClientes(List<Cliente> clientes) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_PATH))) {
             // Cabeçalho do arquivo CSV
-            bw.write("id;nome;morada;dataNascimento;email;password;lancesDisponiveis;isAdmin");
+            bw.write("id;nome;morada;dataNascimento;email;password;lancesDisponiveis;isAdmin;saldo");
             bw.newLine();
 
             // Escreve cada cliente no arquivo
             for (Cliente cliente : clientes) {
-                String linha = String.format("%d;%s;%s;%s;%s;%s;%d;%b",
+                String linha = String.format("%d;%s;%s;%s;%s;%s;%d;%b;%.2f",
                         cliente.getId(),
                         cliente.getNome(),
                         cliente.getMorada(),
@@ -55,7 +56,9 @@ public class ClienteData {
                         cliente.getEmail(),
                         cliente.getPassword(),
                         cliente.getLancesDisponiveis(),
-                        cliente.isAdmin()); // Adicionado o campo isAdmin
+                        cliente.isAdmin(),
+                        cliente.getSaldo());
+
                 bw.write(linha);
                 bw.newLine();
             }
