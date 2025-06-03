@@ -141,7 +141,7 @@ public class MenuPrincipalView {
 
         // Cria e adiciona o novo cliente
         boolean isAdmin = false;
-        Cliente novoCliente = clienteController.criarCliente(nome, morada, dataNascimento, email, password, lancesDisponiveis,isAdmin);
+        Cliente novoCliente = clienteController.criarCliente(nome, morada, dataNascimento, email, password, lancesDisponiveis, isAdmin, 0.0);
         clienteController.adicionarCliente(novoCliente);
         System.out.println("Cliente registrado com sucesso!");
 
