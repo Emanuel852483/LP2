@@ -178,4 +178,29 @@ public class NotificacaoController {
             System.out.println("Erro ao enviar e-mail de aviso de créditos: " + e.getMessage());
         }
     }
+    public static void enviarEmailVencedorLeilao(String email, String nomeCliente, String nomeLeilao, double valorLance) {
+        try {
+            Session session = criarSessaoEmail();
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(remetenteEmail));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
+            message.setSubject("Parabéns! Ganhou o leilão: " + nomeLeilao);
+
+            String htmlContent = "<!DOCTYPE html>"
+                    + "<html><body style='font-family: Arial, sans-serif; background-color: #ffffff; padding: 20px; color: #333;'>"
+                    + "<h2>Olá, " + nomeCliente + "!</h2>"
+                    + "<p>Parabéns! Foi o vencedor do leilão <strong>" + nomeLeilao + "</strong>.</p>"
+                    + "<p>O valor final do seu lance foi de <strong>" + valorLance + "€</strong>.</p>"
+                    + "<p>A nossa equipa entrará em contacto para concluir a transação.</p>"
+                    + "<p>— Equipa de Suporte</p>"
+                    + "</body></html>";
+
+            message.setContent(htmlContent, "text/html; charset=utf-8");
+            Transport.send(message);
+
+            System.out.println("E-mail de vencedor enviado para: " + email);
+        } catch (MessagingException e) {
+            System.out.println("Erro ao enviar e-mail de vencedor: " + e.getMessage());
+        }
+    }
 }
