@@ -1,6 +1,6 @@
 package Model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,16 +11,18 @@ public class Leilao {
     private String nomeProduto;
     private String descricao;
     private String tipoLeilao;
-    private LocalDate dataInicio;
-    private LocalDate dataFim;
+    private LocalDateTime dataInicio;
+    private LocalDateTime dataFim;
     private double valorMinimo;
     private  boolean isAtivo;
     private boolean isFechado;
     private List<Lance> lances;
     private List<Cliente> clientesInscritos;
+    private Cliente vencedor;
+    private List<AvaliacaoLeilao>avaliacoesdosclientes;
 
     // Construtor
-    public Leilao(String nomeProduto, String descricao, String tipoLeilao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, boolean isAtivo, boolean isFechado) {
+    public Leilao(String nomeProduto, String descricao, String tipoLeilao, LocalDateTime dataInicio, LocalDateTime dataFim, double valorMinimo, boolean isAtivo, boolean isFechado) {
         this.id = proximoId++;
         this.nomeProduto = nomeProduto;
         this.descricao = descricao;
@@ -32,6 +34,8 @@ public class Leilao {
         this.isFechado = isFechado;
         this.lances = new ArrayList<>();
         this.clientesInscritos = new ArrayList<>();
+        this.vencedor = null;
+        this.avaliacoesdosclientes = new ArrayList<>();
     }
 
     // Getters e Setters
@@ -73,19 +77,19 @@ public class Leilao {
         this.tipoLeilao = tipoLeilao;
     }
 
-    public LocalDate getDataInicio() {
+    public LocalDateTime getDataInicio() {
         return dataInicio;
     }
 
-    public void setDataInicio(LocalDate dataInicio) {
+    public void setDataInicio(LocalDateTime dataInicio) {
         this.dataInicio = dataInicio;
     }
 
-    public LocalDate getDataFim() {
+    public LocalDateTime getDataFim() {
         return dataFim;
     }
 
-    public void setDataFim(LocalDate dataFim) {
+    public void setDataFim(LocalDateTime dataFim) {
         this.dataFim = dataFim;
     }
 
@@ -128,5 +132,21 @@ public class Leilao {
 
     public void setClientesInscritos(List<Cliente> clientesInscritos) {
         this.clientesInscritos = clientesInscritos;
+    }
+
+    public Cliente getVencedor() {
+        return vencedor;
+    }
+
+    public void setVencedor(Cliente vencedor) {
+        this.vencedor = vencedor;
+    }
+
+    public List<AvaliacaoLeilao> getAvaliacoesdosclientes() {
+        return avaliacoesdosclientes;
+    }
+
+    public void setAvaliacoesdosclientes(List<AvaliacaoLeilao> avaliacoesdosclientes) {
+        this.avaliacoesdosclientes = avaliacoesdosclientes;
     }
 }

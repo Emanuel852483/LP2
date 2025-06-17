@@ -1,33 +1,44 @@
 package View;
 
-import Controller.ClienteController;
-import Controller.LeilaoController;
+import Controller.*;
+import Data.AvaliacaoLeilaoData;
 import Data.ClienteData;
+import Data.NotaData;
 import Model.Cliente;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.List;
 import java.util.Scanner;
 
 public class MenuPrincipalView {
     private final ClienteController clienteController;
     private final LeilaoController leilaoController;
+    private final AgenteController agenteController;
+    private final EstatisticaController estatisticaController;
     private final Scanner scanner;
 
-    // Construtor
-    public MenuPrincipalView(ClienteController clienteController, LeilaoController leilaoController) {
-        this.clienteController = clienteController;
-        this.leilaoController = leilaoController;
+    public MenuPrincipalView() {
+        this.clienteController = new ClienteController();
+        this.leilaoController = new LeilaoController(clienteController);
+        this.agenteController = new AgenteController(leilaoController);
+        leilaoController.setAgenteController(agenteController);
+
+        this.leilaoController.verificarStatusLeiloes();
+
+        this.estatisticaController = new EstatisticaController(clienteController, leilaoController);
+
         this.scanner = new Scanner(System.in);
     }
-
 
 
     // Método para exibir o menu principal
     public void exibirMenu() {
         while (true) {
+            clienteController.verificarInatividadeClientes();
+
             System.out.println("\n=== Menu Principal ===");
             System.out.println("1. Login");
             System.out.println("2. Registar Novo Cliente");
@@ -45,8 +56,10 @@ public class MenuPrincipalView {
                     registrarNovoCliente();
                     break;
                 case 3:
+                    NotificacaoController.gerarRelatoriosCSVSeparados(LeilaoController.listarLeiloes(), ClienteController.listarClientes());
+                    NotificacaoController.enviarRelatoriosCSVparaGestor();
                     System.out.println("Saindo...");
-                    return;
+                    System.exit(0);
                 default:
                     System.out.println("Opção inválida. Tente novamente.");
             }
@@ -65,15 +78,25 @@ public class MenuPrincipalView {
 
         Cliente cliente = clienteController.autenticarCliente(email, password);
         if (cliente != null) {
-            System.out.println("Login bem-sucedido! Bem-vindo, " + cliente.getNome() + ".");
-
+            if ("PENDENTE".equals(cliente.getStatus())) {
+                System.out.println("Aguarde pela a aprovação do administrador.");
+                return;
+            } else if ("REJEITADO".equals(cliente.getStatus())) {
+                System.out.println("Cadastro rejeitado.");
+                return;
+            } else {
+                System.out.println("Login bem-sucedido! Bem-vindo, " + cliente.getNome() + ".");
+                cliente.setUltimoLogin(LocalDateTime.now());
+                ClienteData.salvarClientes(ClienteController.listarClientes());
+            }
 
             if (cliente.isAdmin()) {
-                MenuAdminView menuAdmin = new MenuAdminView(leilaoController, clienteController);
+                MenuAdminView menuAdmin = new MenuAdminView(leilaoController, clienteController, estatisticaController);
                 menuAdmin.exibirMenu();
             } else {
-                MenuClienteView menuCliente = new MenuClienteView(cliente, clienteController, leilaoController);
+                MenuClienteView menuCliente = new MenuClienteView(cliente, clienteController, leilaoController, new AgenteView(agenteController));
                 menuCliente.exibirMenu();
+
             }
         } else {
             System.out.println("E-mail ou senha incorretos.");
@@ -142,16 +165,21 @@ public class MenuPrincipalView {
         int lancesDisponiveis = 0;
         boolean isAdmin = false;
         double saldo = 0;
-        Cliente novoCliente = clienteController.criarCliente(nome, morada, dataNascimento, email, password, lancesDisponiveis,isAdmin,saldo);
+        String status = "PENDENTE";
+        LocalDateTime ultimoLogin = LocalDateTime.now();
+        Cliente novoCliente = clienteController.criarCliente(nome, morada, dataNascimento, email, password, lancesDisponiveis,isAdmin,saldo, ultimoLogin, status);
         boolean sucesso = clienteController.adicionarCliente(novoCliente);
         if (!sucesso) {
             System.err.println("Erro: Não foi possível adicionar o cliente!");
             return;
         }
         System.out.println("Cliente registrado com sucesso!");
+        System.out.println("Cliente pendente, por favor aguarde até a aprovação do administrador!");
 
-        ClienteData clienteData = new ClienteData();
-        clienteData.salvarClientes(clienteController.listarClientes());
+
+
+        ClienteData.salvarClientes(ClienteController.listarClientes());
+
     }
 
 

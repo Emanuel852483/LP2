@@ -1,4 +1,31 @@
-id;nomeProduto;descricao;tipoLeilao;dataInicio;dataFim;valorMinimo;multiploLance;isAtivo;isFechado;lancesIds;clientesIds
-1;Iphone 16;iphone novo;Eletrônico;15-04-2025;29-04-2025;1200.00;100.00;true;false;1,2;2
-2;Rolex Sea-Dweller;Relógio rolex;Carta Fechada;27-04-2025;05-05-2025;20000.00;0.00;false;false;;
-3;Porsche 911 Turbo;Porshe ;Venda Direta;12-05-2025;14-05-2025;400000.00;0.00;false;false;;
+id;nomeProduto;descricao;tipoLeilao;dataInicio;dataFim;valorMinimo;multiploLance;isAtivo;isFechado;lancesIds;clientesIds;vencedorId;Avaliacoesdosclientes
+1;aaa;aaa;Eletrônico;14-04-2025 00:00:00;15-04-2025 00:00:00;1000.00;100.00;false;true;;;;
+2;bbb;bbb;Carta Fechada;18-04-2025 00:00:00;19-04-2025 00:00:00;1000.00;0.00;false;true;;;;
+3;ccc;ccc;Venda Direta;24-04-2025 00:00:00;25-04-2025 00:00:00;10000.00;0.00;false;true;;;;
+4;www;www;Carta Fechada;15-04-2025 00:00:00;19-04-2025 00:00:00;3000.00;0.00;false;true;;;;
+5;Surface Pro;surface rjr;Eletrônico;15-04-2025 00:00:00;15-04-2025 00:00:00;10.00;5.00;false;true;;;;
+6;dfg;dfg;Carta Fechada;28-04-2025 00:00:00;29-08-2025 00:00:00;1000.00;0.00;true;false;;4;;
+7;eqweqw;eqweqw;Venda Direta;29-04-2025 00:00:00;30-04-2025 00:00:00;1000.00;0.00;false;true;;;;
+8;treterte;trryrtyr;Eletrônico;29-04-2025 00:00:00;01-05-2025 00:00:00;1200.00;100.00;false;true;;;;
+9;ooo;ooo;Eletrônico;06-05-2025 00:00:00;08-05-2025 00:00:00;1200.00;100.00;false;true;;;;
+10;dede;dede;Carta Fechada;07-05-2025 00:00:00;08-05-2025 00:00:00;1200.00;0.00;false;true;;;;
+11;wewe;wewe;Eletrônico;12-05-2025 00:00:00;16-05-2025 00:00:00;1200.00;100.00;false;true;1,2,3,4,8;1,2;2;
+12;qwqw;qwqw;Carta Fechada;12-05-2025 00:00:00;16-05-2025 00:00:00;1300.00;0.00;false;true;5,6,7;1,2,4;4;
+13;Tamagoshi;tamagoshi;Venda Direta;13-05-2025 00:00:00;20-05-2025 00:00:00;100.00;0.00;false;true;;;;
+14;abcde;abcde;Venda Direta;22-05-2025 00:00:00;29-05-2025 00:00:00;1400.00;0.00;false;true;9;4;4;
+15;adfhuiabd;dadafa;Eletrônico;28-05-2025 00:00:00;29-05-2025 00:00:00;100.00;50.00;false;true;10,11,12;4,1;1;4
+16;ps5;aa;Carta Fechada;28-05-2025 00:00:00;29-05-2025 00:00:00;50.00;0.00;false;true;;;;
+17;testarleilao;leilao;Eletrônico;30-05-2025 00:00:00;01-06-2025 00:00:00;100.00;50.00;false;true;13,14;4,2;2;2,3
+18;volley bola;volley;Venda Direta;07-06-2025 00:00:00;10-06-2025 00:00:00;25.00;0.00;false;true;15;4;4;1
+19;AAAAA;AAAA;Eletrônico;12-06-2025 00:00:00;13-06-2025 00:00:00;300.00;10.00;false;true;16,18;2,4;2;
+20;adasdsadsadf;fafagfsgrd;Carta Fechada;13-06-2025 00:00:00;14-06-2025 00:00:00;200.00;0.00;false;true;17;2;2;
+21;testaragente;agentes;Eletrônico;13-06-2025 00:00:00;14-06-2025 00:00:00;100.00;10.00;false;true;19,20,21,22,23,24,25,26,27,28;4,2;2;11
+22;AGENTE;AGENTW;Eletrônico;15-06-2025 00:00:00;16-06-2025 00:00:00;300.00;20.00;false;true;29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50;1,2,5,4,7;7;5,6,7,8,9
+23;vencedormandaremail;100;Venda Direta;16-06-2025 00:00:00;17-06-2025 00:00:00;100.00;0.00;false;true;51;7;7;
+24;rtyyukyutrew;rethjkhgtgrf;Venda Direta;17-06-2025 00:00:00;18-06-2025 00:00:00;20.00;0.00;false;true;52;7;7;
+25;qweqeqwrwqrerytjuhgbfvcdsaewdr5t;htgfvdsfertgyh;Carta Fechada;17-06-2025 00:00:00;18-06-2025 00:00:00;30.00;0.00;true;false;53;7;;
+26;AIAIAI;AIAIAI;Eletrônico;17-06-2025 00:00:00;18-06-2025 00:00:00;100.00;5.00;true;false;54,55,56,57,58,59,60,61,62,63;7,4,2;;
+27;testar ver;adsgws;Venda Direta;17-06-2025 00:00:00;18-06-2025 00:00:00;10.00;0.00;false;true;64;1;1;10
+28;versaldo;aeda;Eletrônico;17-06-2025 00:00:00;18-06-2025 00:00:00;10.00;5.00;true;false;65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102;7,5,2,4;;
+29;REMOVER1;FDESF;Eletrônico;17-06-2025 00:00:00;18-06-2025 00:00:00;100.00;10.00;true;false;103,104,105,106,107,108,109,110,111,112;7,2;;
+30;REMOVER2;fs;Carta Fechada;17-06-2025 00:00:00;18-06-2025 00:00:00;200.00;0.00;true;false;;;;

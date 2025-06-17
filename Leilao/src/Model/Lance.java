@@ -1,9 +1,11 @@
 package Model;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Lance {
-    private static int proximoId = 1;
+    private static final AtomicInteger proximoId = new AtomicInteger(1);
 
     private int id;
     private Cliente cliente;
@@ -13,7 +15,7 @@ public class Lance {
 
     // Construtor
     public Lance(Cliente cliente, Leilao leilao, double valor, LocalDateTime dataHora) {
-        this.id = proximoId++;
+        this.id = proximoId.getAndIncrement();
         this.cliente = cliente;
         this.leilao = leilao;
         this.valor = valor;
@@ -28,6 +30,14 @@ public class Lance {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public static void initializeId(List<Lance> lancesExistentes) {
+        int maxId = lancesExistentes.stream()
+                .mapToInt(Lance::getId)
+                .max()
+                .orElse(0);
+        proximoId.set(maxId + 1);
     }
 
     public Cliente getCliente() {

@@ -1,6 +1,7 @@
 package Model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Cliente {
     private static int proximoId = 1;
@@ -14,11 +15,11 @@ public class Cliente {
     private int lancesDisponiveis;
     private boolean isAdmin;
     private double saldo;
-    private LocalDate ultimoLogin; // ✅ NOVO CAMPO
+    private LocalDateTime ultimoLogin;
+    private String status;
 
-    // ✅ Construtor com ultimoLogin
-    public Cliente(String nome, String morada, LocalDate dataNascimento, String email, String password,
-                   int lancesDisponiveis, boolean isAdmin, double saldo, LocalDate ultimoLogin) {
+    // Construtor
+    public Cliente(String nome, String morada, LocalDate dataNascimento, String email, String password, int lancesDisponiveis, boolean isAdmin, double saldo, LocalDateTime ultimoLogin, String status) {
         this.id = proximoId++;
         this.nome = nome;
         this.morada = morada;
@@ -29,15 +30,11 @@ public class Cliente {
         this.isAdmin = isAdmin;
         this.saldo = saldo;
         this.ultimoLogin = ultimoLogin;
-    }
-
-    // ✅ Construtor antigo mantido para compatibilidade (último login = hoje)
-    public Cliente(String nome, String morada, LocalDate dataNascimento, String email, String password,
-                   int lancesDisponiveis, boolean isAdmin, double saldo) {
-        this(nome, morada, dataNascimento, email, password, lancesDisponiveis, isAdmin, saldo, LocalDate.now());
+        this.status = status;
     }
 
     // Getters e Setters
+
 
     public int getId() {
         return id;
@@ -45,6 +42,10 @@ public class Cliente {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public static void setProximoId(int proximoId) {
+        Cliente.proximoId = proximoId;
     }
 
     public String getNome() {
@@ -111,12 +112,19 @@ public class Cliente {
         this.saldo = saldo;
     }
 
-    // ✅ Getters e Setters do campo ultimoLogin
-    public LocalDate getUltimoLogin() {
+    public LocalDateTime getUltimoLogin() {
         return ultimoLogin;
     }
 
-    public void setUltimoLogin(LocalDate ultimoLogin) {
+    public void setUltimoLogin(LocalDateTime ultimoLogin) {
         this.ultimoLogin = ultimoLogin;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

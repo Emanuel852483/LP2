@@ -1,12 +1,9 @@
 package Data;
 
 import Controller.LeilaoController;
-import Model.Leilao;
-import Model.Lance;
-import Model.Cliente;
-import Model.LeilaoCartaFechada;
-import Model.LeilaoEletronico;
-import Model.LeilaoVendaDireta;
+import Model.*;
+
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.io.*;
 import java.time.LocalDate;
@@ -19,7 +16,7 @@ public class LeilaoData {
     private static final String FILE_PATH = "data/Leilao.csv";
 
     // Método para carregar leilões do ficheiro CSV
-    public List<Leilao> carregarLeiloes(List<Cliente> clientes, List<Lance> lances) {
+    public List<Leilao> carregarLeiloes(List<Cliente> clientes, List<Lance> lances, List<AvaliacaoLeilao> avaliacoes) {
         List<Leilao> leiloes = new ArrayList<>();
         int maxId = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(FILE_PATH))) {
@@ -27,13 +24,6 @@ public class LeilaoData {
             br.readLine(); // Ignora o cabeçalho
             while ((linha = br.readLine()) != null) {
                 String[] dados = linha.split(";", -1); // O -1 mantem campos vazios
-
-                // Verifica número mínimo de campos
-                if (dados.length < 11) {
-                    System.out.println("Linha ignorada (campos insuficientes): " + linha);
-                    continue;
-                }
-
 
                 try {
                     int id = Integer.parseInt(dados[0]);
@@ -43,29 +33,35 @@ public class LeilaoData {
                     String nomeProduto = dados[1];
                     String descricao = dados[2];
                     String tipoLeilao = dados[3];
-                    LocalDate dataInicio = LocalDate.parse(dados[4], DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                    LocalDate dataFim = LocalDate.parse(dados[5], DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                    LocalDateTime dataInicio = LocalDate.parse(dados[4], DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")).atStartOfDay();
+                    LocalDateTime dataFim = LocalDate.parse(dados[5], DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")).atStartOfDay();
                     double valorMinimo = Double.parseDouble(dados[6].replace(",", "."));
-
-
                     double multiploLance = !dados[7].isEmpty() ? Double.parseDouble(dados[7].replace(",", ".")) : 0.0;
-
                     boolean isAtivo = Boolean.parseBoolean(dados[8]);
                     boolean isFechado = Boolean.parseBoolean(dados[9]);
-
                     List<Integer> lancesIds = !dados[10].isEmpty() ? parseIdList(dados[10]) : new ArrayList<>();
                     List<Integer> clientesIds = !dados[11].isEmpty() ? parseIdList(dados[11]) : new ArrayList<>();
-
-
+                    Integer vencedorId = !dados[12].isEmpty() ? Integer.parseInt(dados[12]) : null;
+                    List<Integer> avaliacoesIds = !dados[13].isEmpty() ? parseIdList(dados[13]) : new ArrayList<>();
 
                     // Cria o leilão
-                    Leilao leilao = criarLeilaoPorTipo( nomeProduto, descricao, tipoLeilao,
-                            dataInicio, dataFim, valorMinimo,isAtivo, isFechado, multiploLance);
+                    Leilao leilao = criarLeilaoPorTipo(nomeProduto, descricao, tipoLeilao,
+                            dataInicio, dataFim, valorMinimo, isAtivo, isFechado, multiploLance);
                     leilao.setId(id);
 
-                    // Associa lances e clientes
+                    // Associa lances, clientes e vencedor
                     associarLances(leilao, lancesIds, lances);
                     associarClientes(leilao, clientesIds, clientes);
+                    associarAvaliacoes(leilao, avaliacoesIds, avaliacoes);
+
+                    if (vencedorId != null) {
+                        for (Cliente cliente : clientes) {
+                            if (cliente.getId() == vencedorId) {
+                                leilao.setVencedor(cliente);
+                                break;
+                            }
+                        }
+                    }
 
                     leiloes.add(leilao);
                 } catch (Exception e) {
@@ -81,7 +77,7 @@ public class LeilaoData {
     }
 
     private Leilao criarLeilaoPorTipo(String nome, String desc, String tipo,
-                                      LocalDate inicio, LocalDate fim,
+                                      LocalDateTime inicio, LocalDateTime fim,
                                       double min, boolean isativo, boolean isfechado, double multiplo) {
         switch (tipo) {
             case "Eletrônico":
@@ -106,6 +102,17 @@ public class LeilaoData {
         }
     }
 
+    private void associarAvaliacoes(Leilao leilao, List<Integer> avaliacoesIds, List<AvaliacaoLeilao> todasAvaliacoes) {
+        for (int id : avaliacoesIds) {
+            for (AvaliacaoLeilao avaliacaoLeilao : todasAvaliacoes) {
+                if (avaliacaoLeilao.getId() == id) {
+                    leilao.getAvaliacoesdosclientes().add(avaliacaoLeilao);
+                    break;
+                }
+            }
+        }
+    }
+
     private void associarClientes(Leilao leilao, List<Integer> clientesIds, List<Cliente> todosClientes) {
         for (int id : clientesIds) {
             for (Cliente cliente : todosClientes) {
@@ -124,7 +131,7 @@ public class LeilaoData {
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_PATH))) {
             // Cabeçalho do arquivo CSV
-            bw.write("id;nomeProduto;descricao;tipoLeilao;dataInicio;dataFim;valorMinimo;multiploLance;isAtivo;isFechado;lancesIds;clientesIds");
+            bw.write("id;nomeProduto;descricao;tipoLeilao;dataInicio;dataFim;valorMinimo;multiploLance;isAtivo;isFechado;lancesIds;clientesIds;vencedorId;Avaliacoesdosclientes");
             bw.newLine();
 
 
@@ -133,21 +140,27 @@ public class LeilaoData {
             for (Leilao leilao : leiloes) {
                 String lancesIds = leilao.getLances().stream().map(l -> String.valueOf(l.getId())).collect(Collectors.joining(","));
                 String clientesIds = leilao.getClientesInscritos().stream().map(c -> String.valueOf(c.getId())).collect(Collectors.joining(","));
+                String vencedorId = leilao.getVencedor() != null ? String.valueOf(leilao.getVencedor().getId()) : "";
+                String avaliacoesclientes = leilao.getAvaliacoesdosclientes().stream().map(a -> String.valueOf(a.getId())).collect(Collectors.joining(","));
+
+
 
                 String linha = String.format(Locale.US,
-                        "%d;%s;%s;%s;%s;%s;%.2f;%.2f;%b;%b;%s;%s",
+                        "%d;%s;%s;%s;%s;%s;%.2f;%.2f;%b;%b;%s;%s;%s;%s",
                         leilao.getId(),
                         leilao.getNomeProduto(),
                         leilao.getDescricao(),
                         leilao.getTipoLeilao(),
-                        leilao.getDataInicio().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")),
-                        leilao.getDataFim().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")),
+                        leilao.getDataInicio().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")),
+                        leilao.getDataFim().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")),
                         leilao.getValorMinimo(),
                         leilao instanceof LeilaoEletronico ? ((LeilaoEletronico) leilao).getMultiploLance() : 0,
                         leilao.isAtivo(),
                         leilao.isFechado(),
-                        lancesIds,
-                        clientesIds);
+                        lancesIds.isEmpty() ? "" : lancesIds,
+                        clientesIds.isEmpty() ? "" : clientesIds,
+                        vencedorId,
+                        avaliacoesclientes.isEmpty() ? "" : avaliacoesclientes);
                 bw.write(linha);
                 bw.newLine();
             }

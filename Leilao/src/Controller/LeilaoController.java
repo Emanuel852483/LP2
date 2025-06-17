@@ -1,7 +1,12 @@
 package Controller;
 
+import Data.AvaliacaoLeilaoData;
+import Data.ClienteData;
+import Data.LanceData;
 import Model.*;
 import Data.LeilaoData;
+import Data.NotaData;
+import Controller.NotificacaoController;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -9,20 +14,47 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+
+
 public class LeilaoController {
-    private List<Leilao> leiloes;
 
-    // Construtor
-    public LeilaoController() {
-        this.leiloes = new ArrayList<>();
+    private static List<Leilao> leiloes;
+    private final ClienteController clienteController;
+    private AgenteController agenteController;
+    private final List<Lance> lances;
+
+
+    public LeilaoController(ClienteController clienteController) {
+        this.clienteController = clienteController;
+
+
+        leiloes = new LeilaoData().carregarLeiloes(ClienteController.listarClientes(), new ArrayList<>(), new ArrayList<>());
+
+        List<Nota> notas = NotaData.carregarNotas();
+        List<AvaliacaoLeilao> avaliacoes = AvaliacaoLeilaoData.carregarAvaliacoes(ClienteController.listarClientes(), leiloes, notas);
+
+        this.lances = LanceData.carregarLances(ClienteController.listarClientes(), leiloes);
+
+        leiloes = new LeilaoData().carregarLeiloes(ClienteController.listarClientes(), this.lances, avaliacoes);
+
     }
 
-    public static List<Leilao> getLeiloes() {
-        return List.of();
+    public void setAgenteController(AgenteController agenteController) {
+        this.agenteController = agenteController;
     }
 
-    public void setLeiloes(List<Leilao> leiloes) {
-        this.leiloes = leiloes;
+
+    public  List<Leilao> getLeiloes() {
+        return leiloes;
+    }
+
+    public List<Lance> getLances() {
+        return this.lances;
+    }
+
+    public void verificarStatusLeiloes() {
+        verificarStatusLeiloes(leiloes, this.clienteController);
     }
 
     // Método para adicionar um leilão
@@ -52,63 +84,93 @@ public class LeilaoController {
     }
 
     // Método para listar todos os leilões
-    public List<Leilao> listarLeiloes()
+    public static List<Leilao> listarLeiloes()
     {
         return leiloes;
     }
 
     // Método para criar um leilão eletrônico
-    public LeilaoEletronico criarLeilaoEletronico(String nomeProduto, String descricao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, double multiploLance, boolean isAtivo, boolean isFechado) {
+    public LeilaoEletronico criarLeilaoEletronico(String nomeProduto, String descricao, LocalDateTime dataInicio, LocalDateTime dataFim, double valorMinimo, double multiploLance, boolean isAtivo, boolean isFechado) {
         return new LeilaoEletronico(nomeProduto, descricao, dataInicio, dataFim, valorMinimo, multiploLance, isAtivo, isFechado);
     }
 
     // Método para criar um leilão carta fechada
-    public LeilaoCartaFechada criarLeilaoCartaFechada(String nomeProduto, String descricao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, boolean isAtivo, boolean isFechado) {
+    public LeilaoCartaFechada criarLeilaoCartaFechada(String nomeProduto, String descricao, LocalDateTime dataInicio, LocalDateTime dataFim, double valorMinimo, boolean isAtivo, boolean isFechado) {
         return new LeilaoCartaFechada(nomeProduto, descricao, dataInicio, dataFim, valorMinimo, isAtivo, isFechado);
     }
 
     // Método para criar um leilão venda direta
-    public LeilaoVendaDireta criarLeilaoVendaDireta(String nomeProduto, String descricao, LocalDate dataInicio, LocalDate dataFim, double valorMinimo, boolean isAtivo, boolean isFechado) {
+    public LeilaoVendaDireta criarLeilaoVendaDireta(String nomeProduto, String descricao, LocalDateTime dataInicio, LocalDateTime dataFim, double valorMinimo, boolean isAtivo, boolean isFechado) {
         return new LeilaoVendaDireta(nomeProduto, descricao, dataInicio, dataFim, valorMinimo, isAtivo, isFechado);
 
 
     }
 
-    public void verificarStatusLeiloes(List<Leilao> leiloes) {
-        LocalDate hoje = LocalDate.now();
+    public void verificarStatusLeiloes(List<Leilao> leiloes, ClienteController clienteController) {
+        LocalDateTime hoje = LocalDateTime.now();
         boolean modificado = false;
 
         for (Leilao leilao : leiloes) {
-            if (leilao instanceof LeilaoVendaDireta && leilao.isFechado()) continue;
-
-            boolean deveriaEstarAtivo = !hoje.isBefore(leilao.getDataInicio()) &&
+            boolean dentroDoPeriodo = !hoje.isBefore(leilao.getDataInicio()) &&
                     !hoje.isAfter(leilao.getDataFim());
-            boolean deveriaEstarFechado = hoje.isAfter(leilao.getDataFim());
+            boolean periodoEncerrado = hoje.isAfter(leilao.getDataFim());
 
-            boolean foiFechadoAgora = !leilao.isFechado() && deveriaEstarFechado;
+            if (leilao instanceof LeilaoVendaDireta lvd) {
 
-            leilao.setAtivo(deveriaEstarAtivo && !deveriaEstarFechado);
-            leilao.setFechado(deveriaEstarFechado);
+                if (!lvd.getLances().isEmpty()) {
+                    if (!lvd.isFechado()) {
+                        lvd.setFechado(true);
+                        lvd.setAtivo(false);
+                        modificado = true;
+                    }
+                    continue;
+                }
 
-            if (foiFechadoAgora) {
+                if (lvd.isAtivo() != dentroDoPeriodo || lvd.isFechado() == dentroDoPeriodo) {
+                    lvd.setAtivo(dentroDoPeriodo);
+                    lvd.setFechado(!dentroDoPeriodo);
+                    modificado = true;
+                }
+                continue;
+            }
+
+            if (dentroDoPeriodo && leilao.isFechado()) {
+                if (leilao.getLances().isEmpty()) {
+                    leilao.setFechado(false);
+                    leilao.setAtivo(true);
+                    leilao.setVencedor(null);
+                    modificado = true;
+                    continue;
+                }
+            }
+
+            if (periodoEncerrado && !leilao.isFechado()) {
+                List<Lance> lancesBackup = new ArrayList<>(leilao.getLances());
+
+                leilao.setFechado(true);
+                leilao.setAtivo(false);
                 modificado = true;
 
-                // Enviar e-mail ao vencedor, se houver
-                if (!leilao.getLances().isEmpty()) {
-                    Lance lanceVencedor = leilao.getLances().stream()
-                            .max((l1, l2) -> Double.compare(l1.getValor(), l2.getValor()))
-                            .orElse(null);
+                Cliente vencedor = definirVencedor(leilao);
 
-                    if (lanceVencedor != null) {
-                        Cliente vencedor = lanceVencedor.getCliente();
-                        NotificacaoController.enviarEmailVencedorLeilao(
-                                vencedor.getEmail(),
-                                vencedor.getNome(),
-                                leilao.getNomeProduto(),
-                                lanceVencedor.getValor()
-                        );
-                    }
+                if (vencedor != null) {
+                    NotificacaoController.enviarEmailVencedorLeilao(
+                            vencedor.getEmail(),
+                            vencedor.getNome(),
+                            leilao.getNomeProduto(),
+                            leilao.getLances().isEmpty() ? 0 : leilao.getLances().getLast().getValor()
+                    );
                 }
+
+                if (leilao instanceof LeilaoCartaFechada) {
+                    devolverSaldoPerdedores((LeilaoCartaFechada) leilao, clienteController);
+                }
+
+                leilao.setLances(lancesBackup);
+            }
+            else if (leilao.isAtivo() != dentroDoPeriodo) {
+                leilao.setAtivo(dentroDoPeriodo);
+                modificado = true;
             }
         }
 
@@ -117,49 +179,116 @@ public class LeilaoController {
         }
     }
 
+    private Cliente definirVencedor(Leilao leilao) {
+        if (leilao.getLances() == null || leilao.getLances().isEmpty()) {
+            return null;
+        }
+
+        Cliente vencedor = null;
+
+        if (leilao instanceof LeilaoEletronico) {
+            Lance ultimoLance = leilao.getLances().getLast();
+            vencedor = ultimoLance.getCliente();
+        }
+        else if (leilao instanceof LeilaoCartaFechada) {
+            Lance maiorLance = null;
+            for (Lance lance : leilao.getLances()) {
+                if (maiorLance == null || lance.getValor() > maiorLance.getValor()) {
+                    maiorLance = lance;
+                }
+            }
+            vencedor = maiorLance != null ? maiorLance.getCliente() : null;
+        }
+
+        leilao.setVencedor(vencedor);
+        return vencedor;
+    }
+
+    private void devolverSaldoPerdedores(LeilaoCartaFechada leilao, ClienteController clienteController) {
+        if (leilao.getVencedor() == null || leilao.getLances() == null) {
+            return;
+        }
+
+        List<Cliente> todosClientes = clienteController.listarClientes();
+        boolean modificado = false;
+
+
+        for (Lance lance : leilao.getLances()) {
+            if (!lance.getCliente().equals(leilao.getVencedor())) {
+                for (Cliente cliente : todosClientes) {
+                    if (cliente.equals(lance.getCliente())) {
+                        cliente.setSaldo(cliente.getSaldo() + lance.getValor());
+                        modificado = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (modificado) {
+            ClienteData.salvarClientes(todosClientes);
+        }
+    }
 
 
 
 
     public boolean registrarLance(Leilao leilao, Cliente cliente, double valor) {
-        if (leilao == null || cliente == null) {
+        if (leilao == null || cliente == null || cliente.getSaldo() < valor) {
             return false;
         }
+
+        boolean sucesso = false;
 
         if (leilao instanceof LeilaoEletronico) {
-            return registrarLanceEletronico((LeilaoEletronico) leilao, cliente, valor);
+            sucesso = registrarLanceEletronico((LeilaoEletronico) leilao, cliente, valor);
         } else if (leilao instanceof LeilaoCartaFechada) {
-            return registrarLanceCartaFechada((LeilaoCartaFechada) leilao, cliente, valor);
+            sucesso = registrarLanceCartaFechada((LeilaoCartaFechada) leilao, cliente, valor);
         } else if (leilao instanceof LeilaoVendaDireta) {
-            return registrarLanceVendaDireta((LeilaoVendaDireta) leilao, cliente, valor);
-        } else {
-            return false;
+            sucesso = registrarLanceVendaDireta((LeilaoVendaDireta) leilao, cliente, valor);
         }
+
+        if (sucesso) {
+            if (leilao instanceof LeilaoEletronico) {
+                Lance novoLance = leilao.getLances().getLast();
+                new Thread(() -> agenteController.processarNovoLance(novoLance)).start();
+            }
+
+            cliente.setSaldo(cliente.getSaldo() - valor);
+            LanceData.salvarLances(this.lances);
+            LeilaoData.salvarLeiloes(leiloes);
+            ClienteData.salvarClientes(ClienteController.listarClientes());
+        }
+
+        return sucesso;
     }
 
-    // Método para registrar lance em leilão eletrônico
     private boolean registrarLanceEletronico(LeilaoEletronico leilao, Cliente cliente, double valor) {
+        List<Lance> lances = leilao.getLances();
+        Lance novoLance = null;
 
-        if (cliente.getLancesDisponiveis() <= 0) {
-            return false;
-        }
-
-        double ultimoLance = leilao.getLances().isEmpty() ? leilao.getValorMinimo() : leilao.getLances().getLast().getValor();
-
-        // Verifica se o lance é válido (maior que o último lance e múltiplo do incremento)
-        if (valor > ultimoLance && (valor - ultimoLance) % leilao.getMultiploLance() == 0) {
-            Lance lance = new Lance(cliente, leilao, valor, LocalDateTime.now());
-            leilao.getLances().add(lance); // Adiciona o lance ao leilão
-            cliente.setLancesDisponiveis(cliente.getLancesDisponiveis() - 1); // Decrementa os lances do cliente
-            return true;
+        if (lances.isEmpty()) {
+            if (valor >= leilao.getValorMinimo()) {
+                novoLance = new Lance(cliente, leilao, valor, LocalDateTime.now());
+                leilao.getLances().add(novoLance);
+                this.lances.add(novoLance);
+            }
         } else {
-            return false;
+            double ultimoLance = lances.getLast().getValor();
+            if (valor > ultimoLance && (valor - ultimoLance) % leilao.getMultiploLance() == 0) {
+                Cliente clienteAnterior = lances.getLast().getCliente();
+                clienteAnterior.setSaldo(clienteAnterior.getSaldo() + ultimoLance);
+
+                novoLance = new Lance(cliente, leilao, valor, LocalDateTime.now());
+                leilao.getLances().add(novoLance);
+                this.lances.add(novoLance);
+            }
         }
+
+        return novoLance != null;
     }
 
-    // Método para registrar lance em leilão carta fechada
     private boolean registrarLanceCartaFechada(LeilaoCartaFechada leilao, Cliente cliente, double valor) {
-        // Verifica se o cliente já fez um lance neste leilão
         boolean clienteJaFezLance = leilao.getLances().stream()
                 .anyMatch(lance -> lance.getCliente().equals(cliente));
 
@@ -167,30 +296,40 @@ public class LeilaoController {
             return false;
         }
 
-        // Verifica se o lance é maior ou igual ao valor mínimo
-        if (valor >= leilao.getValorMinimo()) {
-            Lance lance = new Lance(cliente, leilao, valor, LocalDateTime.now());
-            leilao.getLances().add(lance); // Adiciona o lance ao leilão
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    // Método para registrar lance em leilão venda direta
-    private boolean registrarLanceVendaDireta(LeilaoVendaDireta leilao, Cliente cliente, double valor) {
-        // Verifica se o lance é maior ou igual ao valor mínimo
         if (valor >= leilao.getValorMinimo()) {
             Lance lance = new Lance(cliente, leilao, valor, LocalDateTime.now());
             leilao.getLances().add(lance);
+            this.lances.add(lance);
             return true;
-        } else {
-            return false;
         }
+        return false;
+    }
+
+    private boolean registrarLanceVendaDireta(LeilaoVendaDireta leilao, Cliente cliente, double valor) {
+        if (valor >= leilao.getValorMinimo()) {
+            Lance lance = new Lance(cliente, leilao, valor, LocalDateTime.now());
+            leilao.getLances().add(lance);
+            this.lances.add(lance);
+
+            leilao.setVencedor(cliente);
+            leilao.getClientesInscritos().add(cliente);
+            leilao.setAtivo(false);
+            leilao.setFechado(true);
+
+            NotificacaoController.enviarEmailVencedorLeilao(
+                    cliente.getEmail(),
+                    cliente.getNome(),
+                    leilao.getNomeProduto(),
+                    valor
+            );
+
+            return true;
+        }
+        return false;
     }
 
 
-    // Método para listar leilões em que um cliente está inscrito
+
     public List<Leilao> listarLeiloesPorCliente(Cliente cliente) {
         return leiloes.stream()
                 .filter(leilao -> leilao.getClientesInscritos().stream()
@@ -198,15 +337,15 @@ public class LeilaoController {
                 .collect(Collectors.toList());
     }
 
-    // Método para listar leilões a terminar (data fim próxima)
+
     public List<Leilao> listarLeiloesATerminar() {
-        LocalDate hoje = LocalDate.now();
+        LocalDateTime hoje = LocalDateTime.now();
         return leiloes.stream()
                 .filter(leilao -> leilao.getDataFim() != null && leilao.getDataFim().isAfter(hoje) && leilao.getDataFim().isBefore(hoje.plusDays(7)) && leilao.isAtivo() && !leilao.isFechado() || leilao.getDataFim().isEqual(hoje)) // Leilões que terminam em até 7 dias
                 .collect(Collectors.toList());
     }
 
-    // Método para listar leilões ativos
+
     public List<Leilao> listarLeiloesAtivos() {
         return leiloes.stream()
                 .filter(Leilao::isAtivo)
@@ -235,5 +374,17 @@ public class LeilaoController {
         }
         return todosLances;
     }
+
+
+
+
+    public List<Lance> obterLancesPorLeilao(Leilao leilao) {
+        if (leilao == null) return new ArrayList<>();
+        return leilao.getLances();
+    }
+
+
+
+
 
 }

@@ -1,3 +1,10 @@
-id;nome;morada;dataNascimento;email;password;lancesDisponiveis;isAdmin;saldo
-1;Francisco Rocha;Rua da Feira;28-10-2000;chico@gmail.com;chico;0;true;0,00
-2;Simão;Rua da Feira;12-03-2002;simao@gmail.com;simao;1;false;0,00
+id;nome;morada;dataNascimento;email;password;lancesDisponiveis;isAdmin;saldo;ultimoLogin;status
+1;testar;testar;12-12-2000;testar@gmail.com;testart;2;false;7610,00;17-06-2025 22:28:06;APROVADO
+2;Simao;Rua das Motas;20-07-2006;simao321@gmail.com;simaotropa;2;false;4040,00;17-06-2025 22:46:59;APROVADO
+3;chico;chico@gmail.com;28-10-2000;chico@gmail.com;chico;0;true;0,00;17-06-2025 23:02:24;APROVADO
+4;aa;aa;12-12-2000;aa@gmail.com;1;1;false;1295,00;17-06-2025 23:00:54;APROVADO
+5;emanuel;afada;12-12-2000;emanuelmaia75@gmail.com;1;0;false;6000,00;17-06-2025 13:05:47;APROVADO
+6;Simao;rua;12-12-2000;simaovalente2020@gmail.com;123;0;false;0,00;04-06-2025 10:00:00;APROVADO
+7;Francisco Rocha;Rua;12-12-2000;1241587@isep.ipp.pt;123;0;false;315,00;17-06-2025 22:56:24;APROVADO
+8;Cliente Pendente;dadadea;07-04-2000;naoseiemail@gmail.com;1;0;false;0,00;16-06-2025 08:45:00;APROVADO
+9;marco;rua;17-01-1998;frwhufbrefbwyedhuiwgewyt@gmail.com;123;0;false;0,00;17-06-2025 22:32:19;PENDENTE
