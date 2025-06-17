@@ -1,17 +1,28 @@
 package Controller;
 
+import Data.ClienteData;
+import Model.Cliente;
+import jakarta.mail.*;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
-import javax.mail.*;
-import javax.mail.internet.*;
 
 public class NotificacaoController {
 
-    public boolean enviarEmail(String destinatario, String nome) {
+    private static final String remetenteEmail = "emanuelmaia75@gmail.com";
+    private static final String password = "dtzg vcmm wcsy oewc";
+    private static final String SMTP_HOST = "smtp.gmail.com";
+    private static final String CSV_PATH = "C:\\Users\\Lenovo\\IdeaProjects\\TESTELP2\\Leilao\\data\\emails_inatividade.csv";
 
-        final String SMTP_HOST = "smtp.gmail.com";
-        final String remetenteEmail = "emanuelmaia75@gmail.com";
-        final String password = "dtzg vcmm wcsy oewc"; // Usa uma app password segura
-
+    private static Session criarSessaoEmail() {
         Properties properties = new Properties();
         properties.put("mail.smtp.auth", "true");
         properties.put("mail.smtp.starttls.enable", "true");
@@ -19,14 +30,17 @@ public class NotificacaoController {
         properties.put("mail.smtp.port", "587");
         properties.put("mail.smtp.ssl.trust", SMTP_HOST);
 
-        Session session = Session.getInstance(properties, new Authenticator() {
+        return Session.getInstance(properties, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(remetenteEmail, password);
             }
         });
+    }
 
+    public boolean enviarEmail(String destinatario, String nome) {
         try {
+            Session session = criarSessaoEmail();
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(remetenteEmail));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));
@@ -41,14 +55,152 @@ public class NotificacaoController {
                     + "</body></html>";
 
             message.setContent(htmlContent, "text/html; charset=utf-8");
-
             Transport.send(message);
+
             System.out.println("E-mail de boas-vindas enviado para: " + destinatario);
             return true;
-
         } catch (MessagingException e) {
             System.out.println("Erro ao enviar e-mail: " + e.getMessage());
             return false;
+        }
+    }
+
+    private static void enviarEmailInatividade(String destinatario, String nome, LocalDate ultimoLogin) {
+        try {
+            Session session = criarSessaoEmail();
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(remetenteEmail));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));
+            message.setSubject("Sentimos a sua falta! Volte à nossa plataforma!");
+
+            String htmlContent = "<!DOCTYPE html>"
+                    + "<html><body style='font-family: Arial, sans-serif; background-color: #ffffff; padding: 20px; color: #333;'>"
+                    + "<h2>Olá, " + nome + "!</h2>"
+                    + "<p>Reparámos que já passaram mais de 3 meses desde o seu último acesso.</p>"
+                    + "<p>Sentimos a sua falta! Volte e veja as novidades que temos para si.</p>"
+                    + "<p>— Equipa de Suporte</p>"
+                    + "</body></html>";
+
+            message.setContent(htmlContent, "text/html; charset=utf-8");
+            Transport.send(message);
+
+            guardarEmailInatividade(destinatario, nome, LocalDate.now());
+
+        } catch (MessagingException e) {
+            System.out.println("Erro ao enviar e-mail de inatividade: " + e.getMessage());
+        }
+    }
+
+    public static void verificarEEnviarEmailInatividade(String destinatario, String nome, LocalDate ultimoLogin) {
+        if (ultimoLogin == null) {
+            System.out.println("Último login desconhecido para " + nome + ", não envia email.");
+            return;
+        }
+
+        LocalDate hoje = LocalDate.now();
+        boolean passaram3Meses = ultimoLogin.plusMonths(3).isBefore(hoje);
+
+        Map<String, LocalDate> enviados = lerEmailsInatividadeCSV();
+        LocalDate dataEnvio = enviados.get(destinatario);
+
+        boolean jaFoiEnviado = dataEnvio != null && dataEnvio.isAfter(ultimoLogin);
+
+        if (passaram3Meses && !jaFoiEnviado) {
+            enviarEmailInatividade(destinatario, nome, ultimoLogin);
+        }
+    }
+
+    private static Map<String, LocalDate> lerEmailsInatividadeCSV() {
+        Map<String, LocalDate> dados = new HashMap<>();
+        if (!Files.exists(Paths.get(CSV_PATH))) return dados;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(CSV_PATH))) {
+            br.readLine(); // ignora o cabeçalho
+            String linha;
+            while ((linha = br.readLine()) != null) {
+                String[] partes = linha.split(",");
+                if (partes.length == 3) {
+                    String email = partes[0];
+                    LocalDate dataEnvio = LocalDate.parse(partes[2]); // agora está na 3ª coluna
+                    dados.put(email, dataEnvio);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao ler CSV: " + e.getMessage());
+        }
+        return dados;
+    }
+
+    private static void guardarEmailInatividade(String email, String nome, LocalDate data) {
+        boolean existe = Files.exists(Paths.get(CSV_PATH));
+
+        try (PrintWriter pw = new PrintWriter(new FileWriter(CSV_PATH, true))) {
+            if (!existe) pw.println("email,nome,dataEnvio"); // cabeçalho atualizado
+            pw.println(email + "," + nome + "," + data);
+        } catch (IOException e) {
+            System.out.println("Erro ao escrever no CSV: " + e.getMessage());
+        }
+    }
+
+    public static void verificarClientesSemSaldoEEnviarEmail() {
+        ClienteData clienteData = new ClienteData();
+        List<Cliente> clientes = clienteData.carregarClientes();
+
+        for (Cliente cliente : clientes) {
+            if (cliente.getSaldo() == 0.0) {
+                enviarEmailSemCreditos(cliente.getEmail(), cliente.getNome());
+            }
+        }
+    }
+
+    public static void enviarEmailSemCreditos(String destinatario, String nome) {
+        try {
+            Session session = criarSessaoEmail();
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(remetenteEmail));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));
+            message.setSubject("Atenção: Ficou sem créditos disponíveis!");
+
+            String htmlContent = "<!DOCTYPE html>"
+                    + "<html><body style='font-family: Arial, sans-serif; background-color: #ffffff; padding: 20px; color: #333;'>"
+                    + "<h2>Olá, " + nome + "!</h2>"
+                    + "<p>Verificámos que ficou sem créditos disponíveis (lances) na sua conta.</p>"
+                    + "<p>Para continuar a participar nos leilões, recomendamos que recarregue os seus créditos o mais breve possível.</p>"
+                    + "<p>Se precisar de ajuda ou tiver dúvidas, entre em contacto connosco.</p>"
+                    + "<p>— Equipa de Suporte</p>"
+                    + "</body></html>";
+
+            message.setContent(htmlContent, "text/html; charset=utf-8");
+            Transport.send(message);
+
+            System.out.println("E-mail de aviso de saldo zero enviado para: " + destinatario);
+        } catch (MessagingException e) {
+            System.out.println("Erro ao enviar e-mail de aviso de créditos: " + e.getMessage());
+        }
+    }
+    public static void enviarEmailVencedorLeilao(String email, String nomeCliente, String nomeLeilao, double valorLance) {
+        try {
+            Session session = criarSessaoEmail();
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(remetenteEmail));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
+            message.setSubject("Parabéns! Ganhou o leilão: " + nomeLeilao);
+
+            String htmlContent = "<!DOCTYPE html>"
+                    + "<html><body style='font-family: Arial, sans-serif; background-color: #ffffff; padding: 20px; color: #333;'>"
+                    + "<h2>Olá, " + nomeCliente + "!</h2>"
+                    + "<p>Parabéns! Foi o vencedor do leilão <strong>" + nomeLeilao + "</strong>.</p>"
+                    + "<p>O valor final do seu lance foi de <strong>" + valorLance + "€</strong>.</p>"
+                    + "<p>A nossa equipa entrará em contacto para concluir a transação.</p>"
+                    + "<p>— Equipa de Suporte</p>"
+                    + "</body></html>";
+
+            message.setContent(htmlContent, "text/html; charset=utf-8");
+            Transport.send(message);
+
+            System.out.println("E-mail de vencedor enviado para: " + email);
+        } catch (MessagingException e) {
+            System.out.println("Erro ao enviar e-mail de vencedor: " + e.getMessage());
         }
     }
 }

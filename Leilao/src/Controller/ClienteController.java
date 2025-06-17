@@ -1,7 +1,7 @@
 package Controller;
 
 import Model.Cliente;
-
+import Data.ClienteData;  // Import necessário para salvar os dados
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +19,10 @@ public class ClienteController {
         this.clientes = clientes;
     }
 
-    // Método para criar um cliente
+    // Método para criar um cliente — adiciona LocalDate.now() como último login
     public Cliente criarCliente(String nome, String morada, LocalDate dataNascimento, String email, String password, int lancesDisponiveis, boolean isAdmin, double saldo) {
-        return new Cliente(nome, morada, dataNascimento, email, password, lancesDisponiveis,isAdmin,saldo);
+        return new Cliente(nome, morada, dataNascimento, email, password, lancesDisponiveis, isAdmin, saldo, LocalDate.now());
     }
-
 
     // Método para adicionar um cliente
     public boolean adicionarCliente(Cliente cliente) {
@@ -34,7 +33,6 @@ public class ClienteController {
     public void removerCliente(Cliente cliente) {
         clientes.remove(cliente);
     }
-
 
     public Cliente buscarClientePorEmail(String email) {
         for (Cliente cliente : clientes) {
@@ -65,6 +63,12 @@ public class ClienteController {
     public Cliente autenticarCliente(String email, String password) {
         Cliente cliente = buscarClientePorEmail(email);
         if (cliente != null && verificarPassword(cliente, password)) {
+            // Atualiza a data do último login para hoje
+            cliente.setUltimoLogin(LocalDate.now());
+
+            // Salva a lista atualizada de clientes no ficheiro CSV
+            ClienteData.salvarClientes(clientes);
+
             return cliente;
         }
         return null;
@@ -87,7 +91,6 @@ public class ClienteController {
         }
         return false;
     }
-
 
     // Método para listar todos os clientes
     public List<Cliente> listarClientes() {

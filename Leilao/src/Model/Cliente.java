@@ -1,4 +1,3 @@
-
 package Model;
 
 import java.time.LocalDate;
@@ -15,10 +14,12 @@ public class Cliente {
     private int lancesDisponiveis;
     private boolean isAdmin;
     private double saldo;
+    private LocalDate ultimoLogin; // ✅ NOVO CAMPO
 
-    // Construtor
-    public Cliente(String nome, String morada, LocalDate dataNascimento, String email, String password, int lancesDisponiveis, boolean isAdmin, double saldo) {
-        this.id = proximoId++; // Atribui o próximo ID e incrementa o contador
+    // ✅ Construtor com ultimoLogin
+    public Cliente(String nome, String morada, LocalDate dataNascimento, String email, String password,
+                   int lancesDisponiveis, boolean isAdmin, double saldo, LocalDate ultimoLogin) {
+        this.id = proximoId++;
         this.nome = nome;
         this.morada = morada;
         this.dataNascimento = dataNascimento;
@@ -27,10 +28,16 @@ public class Cliente {
         this.lancesDisponiveis = lancesDisponiveis;
         this.isAdmin = isAdmin;
         this.saldo = saldo;
+        this.ultimoLogin = ultimoLogin;
+    }
+
+    // ✅ Construtor antigo mantido para compatibilidade (último login = hoje)
+    public Cliente(String nome, String morada, LocalDate dataNascimento, String email, String password,
+                   int lancesDisponiveis, boolean isAdmin, double saldo) {
+        this(nome, morada, dataNascimento, email, password, lancesDisponiveis, isAdmin, saldo, LocalDate.now());
     }
 
     // Getters e Setters
-
 
     public int getId() {
         return id;
@@ -102,5 +109,14 @@ public class Cliente {
 
     public void setSaldo(double saldo) {
         this.saldo = saldo;
+    }
+
+    // ✅ Getters e Setters do campo ultimoLogin
+    public LocalDate getUltimoLogin() {
+        return ultimoLogin;
+    }
+
+    public void setUltimoLogin(LocalDate ultimoLogin) {
+        this.ultimoLogin = ultimoLogin;
     }
 }

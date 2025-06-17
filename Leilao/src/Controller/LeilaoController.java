@@ -17,6 +17,10 @@ public class LeilaoController {
         this.leiloes = new ArrayList<>();
     }
 
+    public static List<Leilao> getLeiloes() {
+        return List.of();
+    }
+
     public void setLeiloes(List<Leilao> leiloes) {
         this.leiloes = leiloes;
     }
@@ -75,20 +79,36 @@ public class LeilaoController {
         boolean modificado = false;
 
         for (Leilao leilao : leiloes) {
-            if (leilao instanceof LeilaoVendaDireta && leilao.isFechado()) {
-                continue; // Não altera leilões de venda direta já comprados
-            }
+            if (leilao instanceof LeilaoVendaDireta && leilao.isFechado()) continue;
 
             boolean deveriaEstarAtivo = !hoje.isBefore(leilao.getDataInicio()) &&
                     !hoje.isAfter(leilao.getDataFim());
             boolean deveriaEstarFechado = hoje.isAfter(leilao.getDataFim());
 
-            if (leilao.isAtivo() != deveriaEstarAtivo ||
-                    leilao.isFechado() != deveriaEstarFechado) {
+            boolean foiFechadoAgora = !leilao.isFechado() && deveriaEstarFechado;
 
-                leilao.setAtivo(deveriaEstarAtivo && !deveriaEstarFechado);
-                leilao.setFechado(deveriaEstarFechado);
+            leilao.setAtivo(deveriaEstarAtivo && !deveriaEstarFechado);
+            leilao.setFechado(deveriaEstarFechado);
+
+            if (foiFechadoAgora) {
                 modificado = true;
+
+                // Enviar e-mail ao vencedor, se houver
+                if (!leilao.getLances().isEmpty()) {
+                    Lance lanceVencedor = leilao.getLances().stream()
+                            .max((l1, l2) -> Double.compare(l1.getValor(), l2.getValor()))
+                            .orElse(null);
+
+                    if (lanceVencedor != null) {
+                        Cliente vencedor = lanceVencedor.getCliente();
+                        NotificacaoController.enviarEmailVencedorLeilao(
+                                vencedor.getEmail(),
+                                vencedor.getNome(),
+                                leilao.getNomeProduto(),
+                                lanceVencedor.getValor()
+                        );
+                    }
+                }
             }
         }
 
@@ -96,6 +116,8 @@ public class LeilaoController {
             LeilaoData.salvarLeiloes(leiloes);
         }
     }
+
+
 
 
 
